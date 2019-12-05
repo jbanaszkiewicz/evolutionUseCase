@@ -175,14 +175,13 @@ def mutate(population):
 
 def choseOsobnik():
   pass
-def main(itMax):
+def main(itMax, sigma):
 
   maxTryskaczy = 15
   mi = 17
   lamb = 7
-  basicSigma = 0.1
   #wygeneruj populację 'mi' osobników i wylosuj lambda-elementową populację tymczasową 
-  population = Population(mi,maxTryskaczy,basicSigma)
+  population = Population(mi,maxTryskaczy,sigma)
   
   
   # testowe 5 iteracji
@@ -220,9 +219,7 @@ def main(itMax):
       Idx = [] # list of mi highest values
       Idx = sorted(range(len(F)), key=lambda i: F[i], reverse=True)[:mi]      
       
-      print (max(F))  
-      
-      rateOsobnik(population.P[Idx[0]])
+      print (max(F))       
 
       # Nadpisanie starej poplacji nowymi osobnikami 
       for i in range(len(Idx)):
@@ -240,5 +237,5 @@ def main(itMax):
   resultMap = map(10)
   resultMap.drawOsobnik(bestOsobnik)
 ##############################################  
-main(10)
+main(10, 2)
   
