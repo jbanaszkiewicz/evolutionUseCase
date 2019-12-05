@@ -4,6 +4,7 @@ from skimage.draw import circle
 import matplotlib.pyplot as plt
 import random 
 from math import sqrt, ceil
+import argparse
 
 class Sprinkler:
       def __init__(self, center, radius):
@@ -25,7 +26,7 @@ class Individual:
         self.sprinklers_locations = [possible_sprinklers[idx] for idx in sprinklers_idxs]
 
 class Algorithm:
-    def __init__(self, population_size,  map, max_iterrs=100, sprinkler_radius=5, ratio_tmp_population=0.5):
+    def __init__(self, population_size,  map, max_iterrs, sprinkler_radius, ratio_tmp_population=0.5):
         self.map = map
         max_sprinklers, _ , _ , _ = self.getMapStat(map)
         self.possible_sprinklers = self.getWaterableLocations()
@@ -177,7 +178,17 @@ def plotAllMaps(maps, size, title):
     plt.show() 
 
 if __name__ == "__main__":
-    map_path = "./maps/map1.json"
+    parser = argparse.ArgumentParser(description="Calculate evolution algorithm")
+    parser.add_argument('map', type=str, help="Source path with map of ascii chars")
+    parser.add_argument('radius', type=int, help="radius of single sprinkler field")
+    parser.add_argument('init_population_size', type=int, help="Number of sprinkers in first population")    
+    parser.add_argument('iterrations', type=int, help="Number of iterations in trening")
+
+    
+    args = parser.parse_args()
+
+    map_path = args.map
+    print(map_path)
     
 
     #zaladuj mapę do macierzy
@@ -188,7 +199,7 @@ if __name__ == "__main__":
     # plt.matshow(drawableMap, vmax=3)
     # plt.show()
 
-    algorithm = Algorithm(10, map_points, ratio_tmp_population=0.1)
+    algorithm = Algorithm(args.init_population_size, map_points, args.iterrations, args.radius, ratio_tmp_population=0.1)
     indivN01 = algorithm.cross_elements(algorithm.population[1], algorithm.population[6])
 
     drawableMap_populations = []
