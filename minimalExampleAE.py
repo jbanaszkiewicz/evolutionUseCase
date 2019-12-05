@@ -237,5 +237,7 @@ def main(itMax, sigma):
   resultMap = map(10)
   resultMap.drawOsobnik(bestOsobnik)
 ##############################################  
-main(10, 2)
+if __name__ == "__main__":
+  main(50, 2)
+  #todo parse argumentów z konsoli Kuba
   
