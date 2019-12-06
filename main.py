@@ -22,7 +22,7 @@ class Individual:
         self.sprinklers_sdv = [radius*2 for idx in range(len(sprinklers_locations))]
 
     def chooseFirstSprinklers(self, possible_sprinklers):
-        sprinklers_idxs = [random.randint(0, len(possible_sprinklers)-1) for i in range(random.randint(1, 1))]    
+        sprinklers_idxs = [random.randint(0, len(possible_sprinklers)-1) for i in range(random.randint(1, len(possible_sprinklers)))]    
         self.sprinklers_locations = [possible_sprinklers[idx] for idx in sprinklers_idxs]
 
 class Algorithm:
@@ -37,27 +37,27 @@ class Algorithm:
 
 
   
-    def cross_elements(self, indiv1, indiv2):
-        # losowanie liczby tryskaczy w nowym krzyzowanym osobniku
-        l1 = len(indiv1.sprinklers_locations)
-        l2 = len(indiv2.sprinklers_locations)
-        minimum = min((l1, l2))-abs(l1-l2)/2 
-        maximum = max((l1, l2))+abs(l1-l2)/2
-        if minimum <0:
-            minimum = 0
-        if maximum >len(self.possible_sprinklers):
-            maximum = len(self.possible_sprinklers)
-        l_n = random.randint(minimum, maximum)
+    # def cross_elements(self, indiv1, indiv2):
+    #     # losowanie liczby tryskaczy w nowym krzyzowanym osobniku
+    #     l1 = len(indiv1.sprinklers_locations)
+    #     l2 = len(indiv2.sprinklers_locations)
+    #     minimum = min((l1, l2))-abs(l1-l2)/2 
+    #     maximum = max((l1, l2))+abs(l1-l2)/2
+    #     if minimum <0:
+    #         minimum = 0
+    #     if maximum >len(self.possible_sprinklers):
+    #         maximum = len(self.possible_sprinklers)
+    #     l_n = random.randint(minimum, maximum)
 
-        # if l_n < l1
-        #krzyżowanie
-        sprinklers_indiv1 = indiv1.sprinklers_locations
-        sprinklers_indiv2 = indiv2.sprinklers_locations
-        sprinklers_indivN = np.multiply(np.add(sprinklers_indiv1, sprinklers_indiv2), 0.5)
-        sprinklers_indivN = sprinklers_indivN.astype(int)
-        indivN = Individual(sprinklers_locations=sprinklers_indivN, radius=indiv1.radius)
-
-        return indivN
+    #     # if l_n < l1
+    #     #krzyżowanie
+    #     sprinklers_indiv1 = indiv1.sprinklers_locations
+    #     sprinklers_indiv2 = indiv2.sprinklers_locations
+    #     sprinklers_indivN = np.multiply(np.add(sprinklers_indiv1, sprinklers_indiv2), 0.5)
+# dual(sprinklers_locations=sprinklers_indivN, radius=indiv1.radius)
+#         sprinklers_indivN = sprinklers_indivN.astype(int)
+#         indivN = Indivi
+#         return indivN
      
 
     def getWaterableLocations(self):
@@ -178,17 +178,20 @@ def plotAllMaps(maps, size, title):
     plt.show() 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Calculate evolution algorithm")
-    parser.add_argument('map', type=str, help="Source path with map of ascii chars")
-    parser.add_argument('radius', type=int, help="radius of single sprinkler field")
-    parser.add_argument('init_population_size', type=int, help="Number of sprinkers in first population")    
-    parser.add_argument('iterrations', type=int, help="Number of iterations in trening")
+    # parser = argparse.ArgumentParser(description="Calculate evolution algorithm")
+    # parser.add_argument('map', type=str, help="Source path with map of ascii chars")
+    # parser.add_argument('radius', type=int, help="radius of single sprinkler field")
+    # parser.add_argument('init_population_size', type=int, help="Number of sprinkers in first population")    
+    # parser.add_argument('iterrations', type=int, help="Number of iterations in trening")
 
     
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    map_path = args.map
-    print(map_path)
+    # map_path = args.map
+    map_path = "./maps/map1.json"
+    radius = 3
+    init_population_size = 49
+    iterrations = 10
     
 
     #zaladuj mapę do macierzy
@@ -199,11 +202,9 @@ if __name__ == "__main__":
     # plt.matshow(drawableMap, vmax=3)
     # plt.show()
 
-    algorithm = Algorithm(args.init_population_size, map_points, args.iterrations, args.radius, ratio_tmp_population=0.1)
-    indivN01 = algorithm.cross_elements(algorithm.population[1], algorithm.population[6])
-
+    algorithm = Algorithm(init_population_size, map_points, iterrations, radius, ratio_tmp_population=0.1)
     drawableMap_populations = []
-    for i in range(10):
+    for i in range(init_population_size):
         filledInMap_population = fillInMap(map_points, algorithm.population[i])
         drawableMap_populations.append(convertMapDrawable(filledInMap_population))
     plotAllMaps(np.array(drawableMap_populations), (50, 50), "Tytul")
