@@ -40,8 +40,8 @@ class osobnik:
    def generateOsobnik(self,numElMax,stdDev, mapSize):
      numEl = np.random.uniform(1,numElMax)     
      for i in range(int(numEl)):       
-       t1_x = np.random.uniform(0,mapSize-1)
-       t1_y = np.random.uniform(0,mapSize-1)
+       t1_x = np.random.uniform(0,mapSize)
+       t1_y = np.random.uniform(0,mapSize)
        t1 = tryskacz(int(t1_x),int(t1_y))
        self.addElem(t1,stdDev)
  
@@ -100,7 +100,7 @@ def rateOsobnik(osobnik, mapSize):
    return fitness(osobnik,m)
 
 def fitness(osobnik, m):
-  a = -5; #koszt nowego osobnika
+  a = -3; #koszt nowego osobnika
   b = 1; #nagroda za pokrycie jednego pola 
   
   return osobnik.getTryskaczCount() * a + m.getMapCoverage() * b
@@ -113,10 +113,10 @@ def updateSigma(fi, c1, c2, sigma, nSigma, iterationIndex, m):
           
         if fi < 0.2:      
             sigma = sigma * c1
-            nSigma = nSigma - 1
+            nSigma = 1
         elif fi > 0.2:
             sigma = sigma * c2 
-            nSigma = nSigma + 1
+            nSigma = 1
         elif fi == 0.2:
             sigma = sigma
             nSigma = nSigma
@@ -136,7 +136,7 @@ def chooseBetterOsobnik (osobnik_parent, osobnik_child, history, mapSize):
         
     return osobnik_parent    
 
-def make_child(osobnik_parent, sigmaNew, nSigmaNew):
+def make_child(osobnik_parent, sigmaNew, nSigmaNew, mapSize):
     
      osobnik_child = osobnik()
              
@@ -147,9 +147,9 @@ def make_child(osobnik_parent, sigmaNew, nSigmaNew):
              x = osobnik_parent.T[i].x + sigmaNew * v 
              y = osobnik_parent.T[i].y + sigmaNew * v 
         
-         if (x < 0 or x > 9 or y <0 or y > 9):
-             x = np.random.uniform(1,9)
-             y = np.random.uniform(1,9)
+         if (x < 0 or x > mapSize or y <0 or y > mapSize):
+             x = np.random.uniform(1,mapSize)
+             y = np.random.uniform(1,mapSize)
              t = tryskacz(int(x),int(y))
          else:
              t = tryskacz(int(x),int(y))        
@@ -162,17 +162,17 @@ def make_child(osobnik_parent, sigmaNew, nSigmaNew):
              x = osobnik_parent.T[i].x + sigmaNew * v 
              y = osobnik_parent.T[i].y + sigmaNew * v 
         
-             if (x < 0 or x > 9 or y <0 or y > 9):
-                 x = np.random.uniform(1,9)
-                 y = np.random.uniform(1,9)
+             if (x < 0 or x > mapSize or y <0 or y > mapSize):
+                 x = np.random.uniform(1,mapSize)
+                 y = np.random.uniform(1,mapSize)
                  t = tryskacz(int(x),int(y))
              else:
                  t = tryskacz(int(x),int(y))        
              osobnik_child.addElem(t,0) 
          
          for i in range(nSigmaNew):
-             x = np.random.uniform(1,9)
-             y = np.random.uniform(1,9)
+             x = np.random.uniform(1,mapSize)
+             y = np.random.uniform(1,mapSize)
              t = tryskacz(int(x),int(y))
              osobnik_child.addElem(t,0)  
             
@@ -186,7 +186,7 @@ def mutationNew(osobnik_parent, history, m, c1, c2, sigma, nSigma, iterationInde
     sigma, nSigma = updateSigma(fi, c1,c2, sigma, nSigma, iterationIndex, m)
     
           
-    osobnik_child = make_child(osobnik_parent, sigma, nSigma)
+    osobnik_child = make_child(osobnik_parent, sigma, nSigma, mapSize)
         
     osobnik_parent = chooseBetterOsobnik(osobnik_parent, osobnik_child, history, mapSize) 
     
@@ -228,7 +228,7 @@ def chooseBestOsobnik(P):
 def main(itMax, sigma, nSigma, mapSize):
 
    # PARAMS
-  maxTryskaczy = 10
+  maxTryskaczy = 350
   m  = 10
   c1 = 0.82
   c2 = 1.2
@@ -250,11 +250,11 @@ def main(itMax, sigma, nSigma, mapSize):
       M.append(bestMap)
       iterInd = iterInd +1
 
-  plotAllMaps(M,(50,50),"Mapy najlepszych osobników po mutacji z każdej iteracji",5,10)
+  plotAllMaps(M,(50,50),"Mapy najlepszych osobników po mutacji z każdej iteracji",2, 2)
   resultMap = map(mapSize)
   resultMap.drawOsobnik(parent)
 ##############################################  
-if __name__ == "__main__":  main(50,1,1,10)
+if __name__ == "__main__":  main(4,2,1,20)
   #todo parse argumentów z konsoli Kuba
   
     
