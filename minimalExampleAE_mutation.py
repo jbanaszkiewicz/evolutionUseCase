@@ -52,15 +52,16 @@ class map:
   def __init__(self,size):
     self.size = size,
     self.mapClean = np.zeros((size, size))
-    self.mapDrawable = np.zeros((size, size))
-    self.tempMapDrawable = np.zeros((12, 12)) 
+    self.mapDrawable = np.zeros((size, size))   
+    self.tempMapDrawable = np.zeros(((size +2), (size +2))) 
 
   def drawTryskacz(self, tryskacz):
      temp = self.tempMapDrawable[tryskacz.x-1+1:tryskacz.x+2+1,tryskacz.y-1+1:tryskacz.y+2+1] 
      temp_template = tryskacz.template
      temp_template[temp == 2] = 2 #zabezpieczenie zeby nie nadpisac wody nad tryskaczem
      self.tempMapDrawable[tryskacz.x-1+1:tryskacz.x+2+1,tryskacz.y-1+1:tryskacz.y+2+1] = temp_template
-     self.mapDrawable = self.tempMapDrawable[1:11,1:11]     
+     print(type(self.size))
+     self.mapDrawable = self.tempMapDrawable[1:(self.size+1),1:(self.size+1)]     
 
   def drawOsobnik(self,osobnik):
     for elem in osobnik.T:
@@ -93,8 +94,8 @@ class Population:
       # print ("Pokrycie mapy osobnika ",i,": ",cov,"/100, fitness: ",fit)
       self.P.append(o1)
 
-def rateOsobnik(osobnik):
-   m = map(10)
+def rateOsobnik(osobnik, mapSize):
+   m = map(mapSize)
    m.drawOsobnik_noPrint(osobnik)
    return fitness(osobnik,m)
 
@@ -122,10 +123,10 @@ def updateSigma(fi, c1, c2, sigma, nSigma, iterationIndex, m):
        
     return sigma, nSigma
     
-def chooseBetterOsobnik (osobnik_parent, osobnik_child, history):
+def chooseBetterOsobnik (osobnik_parent, osobnik_child, history, mapSize):
    
-    fp = rateOsobnik(osobnik_parent)
-    fc = rateOsobnik(osobnik_child) 
+    fp = rateOsobnik(osobnik_parent, mapSize)
+    fc = rateOsobnik(osobnik_child, mapSize) 
         
     if(fc > fp):
         history.append(1)
@@ -178,17 +179,21 @@ def make_child(osobnik_parent, sigmaNew, nSigmaNew):
      return osobnik_child
              
 
-def mutationNew(osobnik_parent, history, m, c1, c2, sigma, nSigma, iterationIndex):
+def mutationNew(osobnik_parent, history, m, c1, c2, sigma, nSigma, iterationIndex,mapSize):
        
     fi = sum(history)/ len(history)
     
     sigma, nSigma = updateSigma(fi, c1,c2, sigma, nSigma, iterationIndex, m)
+    
           
     osobnik_child = make_child(osobnik_parent, sigma, nSigma)
         
-    osobnik_parent = chooseBetterOsobnik(osobnik_parent, osobnik_child, history)
+    osobnik_parent = chooseBetterOsobnik(osobnik_parent, osobnik_child, history, mapSize) 
     
-    return osobnik_parent
+    f = rateOsobnik(osobnik_parent, mapSize)
+    print("Iter ", iterationIndex,": ",f,"sigma: ",sigma, "nSigma: ",nSigma, "successRate: ", fi)
+    
+    return osobnik_parent, sigma, nSigma
 
 def plotAllMaps(maps, size, title, rows, cols):
        
@@ -220,7 +225,7 @@ def chooseBestOsobnik(P):
     return bestOsobnik
 
  
-def main(itMax, sigma, nSigma):
+def main(itMax, sigma, nSigma, mapSize):
 
    # PARAMS
   maxTryskaczy = 10
@@ -233,26 +238,23 @@ def main(itMax, sigma, nSigma):
   M = [] # kontener na mapy
   
   parent = osobnik()
-  parent.generateOsobnik(maxTryskaczy,0,10)
+  parent.generateOsobnik(maxTryskaczy,0,mapSize)
   iterInd = 1
   
   for i in range(itMax): 
 
-      parent = mutationNew(parent, h,m,c1,c2,sigma,nSigma,iterInd)
+      parent, sigma, nSigma = mutationNew(parent, h,m,c1,c2,sigma,nSigma,iterInd,mapSize)     
      
-      m_t = map(10)
-      bestMap = m_t.drawOsobnik_Matrix(parent)
-      f = rateOsobnik(parent)
-      print("Iter ", iterInd,": ",f)
+      m_t = map(mapSize)
+      bestMap = m_t.drawOsobnik_Matrix(parent)     
       M.append(bestMap)
       iterInd = iterInd +1
 
-      
-  #plotAllMaps(M,(50,50),"Mapy najlepszych osobników po mutacji z każdej iteracji",8,8)
-  resultMap = map(10)
+  plotAllMaps(M,(50,50),"Mapy najlepszych osobników po mutacji z każdej iteracji",5,10)
+  resultMap = map(mapSize)
   resultMap.drawOsobnik(parent)
 ##############################################  
-if __name__ == "__main__":
-  main(150,0.1,1)
+if __name__ == "__main__":  main(50,1,1,10)
   #todo parse argumentów z konsoli Kuba
   
+    
