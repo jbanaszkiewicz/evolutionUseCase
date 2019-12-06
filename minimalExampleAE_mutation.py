@@ -60,8 +60,8 @@ class map:
      temp_template = tryskacz.template
      temp_template[temp == 2] = 2 #zabezpieczenie zeby nie nadpisac wody nad tryskaczem
      self.tempMapDrawable[tryskacz.x-1+1:tryskacz.x+2+1,tryskacz.y-1+1:tryskacz.y+2+1] = temp_template
-     print(type(self.size))
-     self.mapDrawable = self.tempMapDrawable[1:(self.size+1),1:(self.size+1)]     
+     local_size = self.size[0]+1
+     self.mapDrawable = self.tempMapDrawable[1:local_size,1:local_size]     
 
   def drawOsobnik(self,osobnik):
     for elem in osobnik.T:
