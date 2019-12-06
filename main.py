@@ -190,8 +190,9 @@ if __name__ == "__main__":
     # map_path = args.map
     map_path = "./maps/map1.json"
     radius = 3
-    init_population_size = 49
+    init_population_size = 50
     iterrations = 10
+    init_sprinklers_nr = 10
     
 
     #zaladuj mapę do macierzy
