@@ -273,7 +273,7 @@ def main(itMax, sigma):
   bestOsobnik = chooseBestOsobnik(population.P)
   resultMap = map(10)
   resultMap.drawOsobnik(bestOsobnik)
-##############################################  
+  
 if __name__ == "__main__":
   main(100,0.5)
   #todo parse argumentów z konsoli Kuba
