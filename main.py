@@ -7,58 +7,50 @@ from math import sqrt, ceil
 import argparse
 
 class Sprinkler:
-      def __init__(self, center, radius):
+    """
+    Definition of the prinkler
+    center :param: tuple coordinates of the sprinkler
+    """
+    def __init__(self, center, radius):
         self.center = center
         self.radius = radius
 
 class Individual:
     def __init__(self, sprinklers_locations, radius, first=False):
         self.radius = radius
+        self.sprinklers = []
     
-        if first == True:
-            self.chooseFirstSprinklers(sprinklers_locations)
-        else:
-            self.sprinklers_locations = sprinklers_locations
-        self.sprinklers_sdv = [radius*2 for idx in range(len(sprinklers_locations))]
+        # if first == True:
+        #     self.chooseFirstSprinklers(sprinklers_locations)
+        # else:
+        #     self.sprinklers_locations = sprinklers_locations
+        # self.sprinklers_sdv = [radius*2 for idx in range(len(sprinklers_locations))]
 
-    def chooseFirstSprinklers(self, possible_sprinklers):
-        sprinklers_idxs = [random.randint(0, len(possible_sprinklers)-1) for i in range(random.randint(1, len(possible_sprinklers)))]    
-        self.sprinklers_locations = [possible_sprinklers[idx] for idx in sprinklers_idxs]
+    def addElem(self, sprinkler):
+        self.sprinklers.append(sprinkler)
 
-class Algorithm:
-    def __init__(self, population_size,  map, max_iterrs, sprinkler_radius, ratio_tmp_population=0.5):
-        self.map = map
-        max_sprinklers, _ , _ , _ = self.getMapStat(map)
-        self.possible_sprinklers = self.getWaterableLocations()
-        
-        self.population= [Individual(self.possible_sprinklers,sprinkler_radius, first=True) for i in range(population_size)]
-        tmp_population_idxs = [random.randint(0, len(self.population)) for i in range(int(len(self.population)*ratio_tmp_population))]
-        self.tmp_population = [self.population[idx] for idx in range(len(tmp_population_idxs))]
+    def generateIndividual(self, numElemMax, mapSize):
+        """
+        Generates whole individual, adding new sprinklers.
+        mapSize :param: tuple with (x, y) size of the map
+        """
+        numElem = np.random.uniform(1,numElemMax)
+        self.sprinklers = [(np.random.uniform(0, mapSize[0]), np.random.uniform(0, mapSize[0])) for i in range(numElem)]
+    def getSprinklersAmmount(self):
+        return len(self.sprinklers)
 
 
-  
-    # def cross_elements(self, indiv1, indiv2):
-    #     # losowanie liczby tryskaczy w nowym krzyzowanym osobniku
-    #     l1 = len(indiv1.sprinklers_locations)
-    #     l2 = len(indiv2.sprinklers_locations)
-    #     minimum = min((l1, l2))-abs(l1-l2)/2 
-    #     maximum = max((l1, l2))+abs(l1-l2)/2
-    #     if minimum <0:
-    #         minimum = 0
-    #     if maximum >len(self.possible_sprinklers):
-    #         maximum = len(self.possible_sprinklers)
-    #     l_n = random.randint(minimum, maximum)
+    # def chooseFirstSprinklers(self, possible_sprinklers):
+    #     sprinklers_idxs = [random.randint(0, len(possible_sprinklers)-1) for i in range(random.randint(1, len(possible_sprinklers)))]    
+    #     self.sprinklers_locations = [possible_sprinklers[idx] for idx in sprinklers_idxs]
 
-    #     # if l_n < l1
-    #     #krzyżowanie
-    #     sprinklers_indiv1 = indiv1.sprinklers_locations
-    #     sprinklers_indiv2 = indiv2.sprinklers_locations
-    #     sprinklers_indivN = np.multiply(np.add(sprinklers_indiv1, sprinklers_indiv2), 0.5)
-# dual(sprinklers_locations=sprinklers_indivN, radius=indiv1.radius)
-#         sprinklers_indivN = sprinklers_indivN.astype(int)
-#         indivN = Indivi
-#         return indivN
-     
+class Map:
+    def __init__(self,  mapRaw):
+        self.mapRaw = mapRaw #unchanged since the beggining
+        self.mapPoints = [[Point(elem) for elem in row] for row in self.mapRaw]
+        self.mapDrawable = convertMapDrawable(self.mapPoints)
+        # max_sprinklers, _ , _ , _ = self.getMapStat(map)
+        # self.possible_sprinklers = self.getWaterableLocations()
 
     def getWaterableLocations(self):
         waterable_locations = []
@@ -68,9 +60,19 @@ class Algorithm:
                     waterable_locations.append((i, j))
         return waterable_locations
 
-  
-    def getMapStat(self, map):
-        map_size = np.shape(map)
+    def drawSprinkler(self, sprinkler):
+        #TODO pod mapę podrzucić tryskacza.
+         
+        rr, cc = circle(sprinkler.center[0], sprinkler.center[1], sprinkler.radius , np.shape(self.mapRaw))
+        self.mapPoints[rr, cc] = Point("~")
+        self.mapPoints[sprinkler.center[0], sprinkler.center[1]] = Point("*")
+        for i, row in enumerate(self.mapPoints):
+            for j, elem in enumerate(row):
+                if elem.is_waterable == False:
+                    self.mapPoints[i][j] = Point("#")
+        self.mapDrawable = convertMapDrawable(self.mapPoints)
+
+    def getMapStat(self, mapPoints):
         counter_waterable = 0 
         counter_wet = 0
         counter_sprinklers = 0
@@ -86,10 +88,7 @@ class Algorithm:
         counter_wet +=counter_sprinklers
         counter_waterable += counter_wet
         ratio_coverage = counter_wet/counter_waterable
-        print(f"counter_waterable:  {counter_waterable}")
-        print(f"counter_wet:        {counter_wet}")
-        print(f"counter_sprinklers: {counter_sprinklers}")
-        print(f"ratio_coverage:     {ratio_coverage}")
+        print(f"counter:    waterable:  {counter_waterable} wet: {counter_wet} sprinklers: {counter_sprinklers} ratio_coverage:     {ratio_coverage}")
         return counter_waterable, counter_wet, counter_sprinklers, ratio_coverage
         
 
@@ -101,6 +100,7 @@ class Point:
   # is_wet = False  
     def __init__(self, ascii_char):
         self.encode_point(ascii_char)
+
     def display_point(self):
         if self.is_sprinkler: 
             return "*"
@@ -144,21 +144,21 @@ def convertMapDrawable(map_pts):
         drawableMap.append(new_row)
     return drawableMap
 
-def fillInMap(clean_map_pts, individual):
-    tmp_map_pts = np.copy(clean_map_pts)
-    sprinklers_locations = individual.sprinklers_locations
-    radius = individual.radius
-    print(f"radius: {radius}")
-    for location in sprinklers_locations:
-        rr, cc = circle(location[0], location[1], radius , np.shape(clean_map_pts))
-        tmp_map_pts[rr, cc] = Point("~")
-    for location in sprinklers_locations:
-        tmp_map_pts[location[0]][location[1]] = Point("*")
-    for i, row in enumerate(clean_map_pts):
-        for j, elem in enumerate(row):
-            if elem.is_waterable == False:
-                tmp_map_pts[i][j] = Point("#")
-    return tmp_map_pts
+# def fillInMap(clean_map_pts, individual):
+#     tmp_map_pts = np.copy(clean_map_pts)
+#     sprinklers_locations = individual.sprinklers_locations
+#     radius = individual.radius
+#     print(f"radius: {radius}")
+#     for location in sprinklers_locations:
+#         rr, cc = circle(location[0], location[1], radius , np.shape(clean_map_pts))
+#         tmp_map_pts[rr, cc] = Point("~")
+#     for location in sprinklers_locations:
+#         tmp_map_pts[location[0]][location[1]] = Point("*")
+#     for i, row in enumerate(clean_map_pts):
+#         for j, elem in enumerate(row):
+#             if elem.is_waterable == False:
+#                 tmp_map_pts[i][j] = Point("#")
+#     return tmp_map_pts
 
 def plotAllMaps(maps, size, title):
        
@@ -198,8 +198,7 @@ if __name__ == "__main__":
     #zaladuj mapę do macierzy
     with open(map_path) as json_file:
         data_map0 = json.load(json_file)
-    map_points = [[Point(elem) for elem in row] for row in data_map0]
-    drawableMap = convertMapDrawable(map_points)
+    
     # plt.matshow(drawableMap, vmax=3)
     # plt.show()
 

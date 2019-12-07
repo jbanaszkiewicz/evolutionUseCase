@@ -28,15 +28,15 @@ class osobnik:
 
    def addElem(self, tryskacz,stdDev):
      self.T.append(tryskacz)
-     self.S.append(stdDev)
+    #  self.S.append(stdDev)
 
-   def addSigma(self,stdDev):
-     self.S.append(stdDev)
+  #  def addSigma(self,stdDev):
+  #    self.S.append(stdDev)
 
-   def printOsobnik(self):
-     for i in range(len(self.T)):
-       print ( "  Tryskacz_",i,": (",self.T[i].x,",",self.T[i].y,"),stdEv: ",self.S[i]) 
-
+  #  def printOsobnik(self):
+  #    for i in range(len(self.T)):
+  #      print ( "  Tryskacz_",i,": (",self.T[i].x,",",self.T[i].y,"),stdEv: ",self.S[i]) 
+  #TODO wywalic stdDev
    def generateOsobnik(self,numElMax,stdDev, mapSize):
      numEl = np.random.uniform(1,numElMax)     
      for i in range(int(numEl)):       
@@ -47,7 +47,7 @@ class osobnik:
  
    def getTryskaczCount(self):
       return len(self.T)
-
+#TODO podmienic na swoje
 class map:
   def __init__(self,size):
     self.size = size,
@@ -80,19 +80,19 @@ class map:
   def getMapCoverage(self):
      return np.count_nonzero(self.mapDrawable) # haha niesamowite ze byla taka funkcja lol po c++ trudno w to uwierzyć :p
 
-class Population:
- def __init__(self, populationSize, maxIndividualSize, basicSigma):
-   self.P = []# mi size population  
+# class Population:
+#  def __init__(self, populationSize, maxIndividualSize, basicSigma):
+#    self.P = []# mi size population  
    
-   for i in range(populationSize):
-      o1 = osobnik()
-      o1.generateOsobnik(maxIndividualSize,basicSigma,10)
-      # m = map(10)
-      # m.drawOsobnik(o1)
-      # cov = m.getMapCoverage()
-      # fit = fitness(o1,m)
-      # print ("Pokrycie mapy osobnika ",i,": ",cov,"/100, fitness: ",fit)
-      self.P.append(o1)
+#    for i in range(populationSize):
+#       o1 = osobnik()
+#       o1.generateOsobnik(maxIndividualSize,basicSigma,10)
+#       # m = map(10)
+#       # m.drawOsobnik(o1)
+#       # cov = m.getMapCoverage()
+#       # fit = fitness(o1,m)
+#       # print ("Pokrycie mapy osobnika ",i,": ",cov,"/100, fitness: ",fit)
+#       self.P.append(o1)
 
 def rateOsobnik(osobnik, mapSize):
    m = map(mapSize)
