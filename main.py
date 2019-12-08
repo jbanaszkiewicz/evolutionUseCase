@@ -120,22 +120,22 @@ class ActualMap:
         return ratio_coverage
     
 
-def getFitness(individual, currentMap, a, b):
+def getFitness(individual, currentMap, a):
     """vx
     Calculates fitness of the individual using function:
     f(nrSprinklers, mapCoverage) = a*nrSprinklers + b*mapCoverage
     """
     maxSprinklers = currentMap.maxSprinklers
     currentSprinklers = individual.getSprinklersAmmount()
-    sprinklers = (maxSprinklers-currentSprinklers)/maxSprinklers
+    sprinklers = (maxSprinklers/individual.radius-currentSprinklers)/(maxSprinklers/individual.radius)
     mapCoverage = currentMap.getMapCoverage()
-    print("Sprinklers:  %f  Coverage:   %f" % (sprinklers, mapCoverage))
+    print("Sprinklers:  %f,     coverage: %f" % (sprinklers, mapCoverage))
     return sprinklers*a + (1-a)*mapCoverage
 
-def rateIndividual(individual, actualMap, a, b):
+def rateIndividual(individual, actualMap, a):
     currentMap = deepcopy(actualMap)
     currentMap.drawIndividual(individual)
-    return getFitness(individual, currentMap, a, b) 
+    return getFitness(individual, currentMap, a) 
 
 def updateSigma(fi, c1, c2, sigma, nSigma, iterationIndex, m):
       
@@ -154,9 +154,9 @@ def updateSigma(fi, c1, c2, sigma, nSigma, iterationIndex, m):
        
     return sigma, nSigma
 
-def chooseBetterIndividual(individual_parent, individual_child, history, actualMap, a, b):
-    fp = rateIndividual(individual_parent, actualMap, a, b)
-    fc = rateIndividual(individual_child, actualMap, a, b)
+def chooseBetterIndividual(individual_parent, individual_child, history, actualMap, a):
+    fp = rateIndividual(individual_parent, actualMap, a)
+    fc = rateIndividual(individual_child, actualMap, a)
     a = 3
     if (fc>fp):
         history.append(1)
@@ -253,7 +253,7 @@ class Point:
         self.is_waterable = (ascii_char == ".")
         self.is_wall = (ascii_char == "#")
 
-def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, iterationIndex, actualMap, a, b):
+def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, iterationIndex, actualMap, a):
     fi = sum(history)/ len(history)
     
     sigma, nSigma = updateSigma(fi, c1,c2, sigma, nSigma, iterationIndex, m)
@@ -261,9 +261,9 @@ def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, iterationI
           
     individualChild = makeChild(individual_parent, sigma, nSigma, actualMap)
         
-    individual = chooseBetterIndividual(individual_parent, individualChild, history, actualMap, a, b) 
+    individual = chooseBetterIndividual(individual_parent, individualChild, history, actualMap, a) 
     
-    f = rateIndividual(individual, actualMap, a, b)
+    f = rateIndividual(individual, actualMap, a)
     print("Iter ", iterationIndex," rate:   ",f,"sigma: ",sigma, "nSigma:   ",nSigma, "successRate:     ", fi)
     
     return individual, sigma, nSigma
@@ -327,15 +327,11 @@ if __name__ == "__main__":
     # map_path = args.map
     map_path = "./maps/map2.json"
     radius = 10
-    init_population_size = 50
     iterations = 10
     init_sprinklers_nr = 10
     sigma = 2
     nSigma = 10
-    a = 0.5 #wieksze faworyzuje mniej sprinklerow
-    b = 1
-
-    maxSprinklers = 1
+    a = 0.1 #wieksze faworyzuje mniej sprinklerow
     historyMaxLength = 10
     c1 = 0.82
     c2 = 1.2
@@ -351,7 +347,7 @@ if __name__ == "__main__":
     
 
     parent = Individual(radius)   
-    parent.generateIndividual(maxSprinklers, actualMap)
+    parent.generateIndividual(init_sprinklers_nr, actualMap)
     actualMap.drawIndividual(parent)
     
 
@@ -360,7 +356,7 @@ if __name__ == "__main__":
     # plt.show()
 
     for i in range(iterations):
-        parent, sigma, nSigma = mutationNew(parent, history, historyMaxLength, c1, c2, sigma, nSigma, i+1, actualMap, a, b)
+        parent, sigma, nSigma = mutationNew(parent, history, historyMaxLength, c1, c2, sigma, nSigma, i+1, actualMap, a)
         actualMap.drawIndividual(parent)
         maps.append(deepcopy(actualMap))
         actualMap.resetActualMap()
