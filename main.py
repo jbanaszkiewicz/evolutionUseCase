@@ -37,10 +37,15 @@ class Individual:
         """
 
         numElem = np.random.randint(1,numElemMax+1)
-        s1 = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
-        s2 = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
-        self.sprinklers = [Sprinkler((s1, s2), self.radius) for i in range(numElem)]
-        
+        for i in range(numElem):
+            s1 = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
+            s2 = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
+            while(actualMap.mapPoints[s1, s2].is_wall == True):
+                print("Probowano wstawic sprinklera na sciane (%d, %d)" % (s1, s2))
+                s1 = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
+                s2 = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
+            self.sprinklers.append(Sprinkler((s1, s2), self.radius))
+        print("liczba sprinklerow: %d" % (self.getSprinklersAmmount()))
     
     def getSprinklersAmmount(self):
         return len(self.sprinklers)
@@ -292,7 +297,7 @@ if __name__ == "__main__":
     iterrations = 10
     init_sprinklers_nr = 10
 
-    maxSprinklers = 10
+    maxSprinklers = 15
     m = 10
     c1 = 0.82
     c2 = 1.2
