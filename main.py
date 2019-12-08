@@ -7,6 +7,7 @@ from math import sqrt, ceil
 import argparse
 from copy import deepcopy
 from collections import deque
+from math import pi
 
 class Sprinkler:
     """
@@ -21,6 +22,7 @@ class Individual:
     def __init__(self, radius):
         self.radius = radius
         self.sprinklers = []
+        self.sprinklerField = pi*self.radius*self.radius
     
         # if first == True:
         #     self.chooseFirstSprinklers(sprinklers_locations)
@@ -127,7 +129,10 @@ def getFitness(individual, currentMap, a):
     """
     maxSprinklers = currentMap.maxSprinklers
     currentSprinklers = individual.getSprinklersAmmount()
-    sprinklers = (maxSprinklers/individual.radius-currentSprinklers)/(maxSprinklers/individual.radius)
+    #TODO poprawić zeby dzielic liczbe tryskaczy przez pole tryskacza
+    #pole tryskacza
+    
+    sprinklers = (maxSprinklers/individual.sprinklerField-currentSprinklers)/(maxSprinklers/individual.sprinklerField)
     mapCoverage = currentMap.getMapCoverage()
     print("Sprinklers:  %f,     coverage: %f" % (sprinklers, mapCoverage))
     return sprinklers*a + (1-a)*mapCoverage
@@ -244,6 +249,7 @@ class Point:
         self.is_wall = (ascii_char == "#")
 
 def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, iterationIndex, actualMap, a):
+    #TODO zweryfikować działanie history
     fi = sum(history)/ len(history)
     
     sigma, nSigma = updateSigma(fi, c1,c2, sigma, nSigma, iterationIndex, m)
@@ -317,11 +323,11 @@ if __name__ == "__main__":
     # map_path = args.map
     map_path = "./maps/map2.json"
     radius = 10
-    iterations = 100
+    iterations = 300
     init_sprinklers_nr = 10
     sigma = 2
     nSigma = 2
-    a = 0.1 #wieksze faworyzuje mniej sprinklerow
+    a = 0.3 #wieksze faworyzuje mniej sprinklerow
     historyMaxLength = 10
     c1 = 0.82
     c2 = 1.2
@@ -349,8 +355,9 @@ if __name__ == "__main__":
         actualMap.drawIndividual(parent)
         maps.append(deepcopy(actualMap))
         actualMap.resetActualMap()
-    plotAllMaps(maps[-10:], "Wykresiki" )
-    plotAllMaps(maps[-2:], "Wykresiki" )
+    plotAllMaps(maps[:100], "first 100" )    
+    plotAllMaps(maps[-100:], "last 100" )
+    plotAllMaps(maps[-10:], "last 10" )
 
 
     # for i in range(init_population_size):
