@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import random 
 from math import sqrt, ceil
 import argparse
+from copy import deepcopy
 
 class Sprinkler:
     """
@@ -16,7 +17,7 @@ class Sprinkler:
         self.radius = radius
 
 class Individual:
-    def __init__(self, sprinklers_locations, radius, first=False):
+    def __init__(self, radius, first=False):
         self.radius = radius
         self.sprinklers = []
     
@@ -35,16 +36,16 @@ class Individual:
         mapSize :param: tuple with (x, y) size of the map
         """
         numElem = np.random.uniform(1,numElemMax)
-        self.sprinklers = [(np.random.uniform(0, mapSize[0]), np.random.uniform(0, mapSize[0])) for i in range(numElem)]
+        self.sprinklers = [Sprinkler(np.random.uniform(0, mapSize[0]), np.random.uniform(0, mapSize[0]), self.radius) for i in range(numElem)]
+    
     def getSprinklersAmmount(self):
         return len(self.sprinklers)
-
 
     # def chooseFirstSprinklers(self, possible_sprinklers):
     #     sprinklers_idxs = [random.randint(0, len(possible_sprinklers)-1) for i in range(random.randint(1, len(possible_sprinklers)))]    
     #     self.sprinklers_locations = [possible_sprinklers[idx] for idx in sprinklers_idxs]
 
-class Map:
+class ActualMap:
     def __init__(self,  mapRaw):
         self.mapRaw = mapRaw #unchanged since the beggining
         self.mapPoints = [[Point(elem) for elem in row] for row in self.mapRaw]
@@ -54,30 +55,29 @@ class Map:
 
     def getWaterableLocations(self):
         waterable_locations = []
-        for i, row in enumerate(self.map):
+        for i, row in enumerate(self.mapPoints):
             for j, point in enumerate(row):
                 if point.is_waterable or point.is_wet or point.is_sprinkler:
                     waterable_locations.append((i, j))
         return waterable_locations
 
-    def drawSprinkler(self, sprinkler):
-        #TODO pod mapę podrzucić tryskacza.
-         
-        rr, cc = circle(sprinkler.center[0], sprinkler.center[1], sprinkler.radius , np.shape(self.mapRaw))
-        self.mapPoints[rr, cc] = Point("~")
-        self.mapPoints[sprinkler.center[0], sprinkler.center[1]] = Point("*")
-        for i, row in enumerate(self.mapPoints):
-            for j, elem in enumerate(row):
-                if elem.is_waterable == False:
-                    self.mapPoints[i][j] = Point("#")
+    def drawIndividual(self, individual):
+        for sprinkler in individual.sprinklers:
+            rr, cc = circle(sprinkler.center[0], sprinkler.center[1], sprinkler.radius , np.shape(self.mapRaw))
+            self.mapPoints[rr, cc] = Point("~")
+            self.mapPoints[sprinkler.center[0], sprinkler.center[1]] = Point("*")
+            for i, row in enumerate(self.mapPoints):
+                for j, elem in enumerate(row):
+                    if elem.is_waterable == False:
+                        self.mapPoints[i][j] = Point("#")
         self.mapDrawable = convertMapDrawable(self.mapPoints)
 
-    def getMapStat(self, mapPoints):
+    def getMapCoverage(self):
         counter_waterable = 0 
         counter_wet = 0
         counter_sprinklers = 0
         
-        for row in map:
+        for row in self.mapPoints:
             for point in row:
                 if point.is_sprinkler:
                     counter_sprinklers += 1
@@ -88,11 +88,84 @@ class Map:
         counter_wet +=counter_sprinklers
         counter_waterable += counter_wet
         ratio_coverage = counter_wet/counter_waterable
-        print(f"counter:    waterable:  {counter_waterable} wet: {counter_wet} sprinklers: {counter_sprinklers} ratio_coverage:     {ratio_coverage}")
-        return counter_waterable, counter_wet, counter_sprinklers, ratio_coverage
+        return ratio_coverage
+    
+
+def getFitness(individual, currentMap, a, b):
+    """
+    Calculates fitness of the individual using function:
+    f(nrSprinklers, mapCoverage) = a*nrSprinklers + b*mapCoverage
+    """
+    return individual.getSprinklersAmmount()*a + actualMap.getMapCoverage()*b
+
+def rateIndividual(individual, actualMap, a, b):
+    currentMap = deepcopy(actualMap)
+    currentMap.drawIndividual(individual)
+    return getFitness(individual, currentMap, a, b) 
+
+def updateSigma(fi, c1, c2, sigma, nSigma, iterationIndex, m):
+      
+    if((iterationIndex % m) == 0): # co m iteraji wykonaj  zerowanie bufora i update sigm
+        history = []
+        history.append(1)   
+          
+        if fi < 0.2:      
+            sigma = sigma * c1
+            nSigma = 1
+        elif fi > 0.2:
+            sigma = sigma * c2 
+            nSigma = 1
+        elif fi == 0.2:
+            sigma = sigma
+            nSigma = nSigma
+       
+    return sigma, nSigma
+
+def chooseBetterIndividual(individual_parent, individual_child, history, actualMap, a, b):
+    fp = rateIndividual(individual_parent, actualMap, a, b)
+    fc = rateIndividual(individual_child, actualMap, a, b)
+
+    if (fc>fp):
+        history.append(1)
+        return individual_child
+    else:
+        history.append(0)
+        return individual_parent
+
+def makeChild(individual_parent, sigmaNew, nSigmaNew, actualMap):
+    individualChild = Individual(individual_parent.radius)
+    #TODO mam wrażenie ze w tych if else dzieje sie to samo, ale troche w innej kolejnosci
+    if(nSigmaNew  < 0):
+             
+        for i in range(len(individual_parent.sprinklers) + nSigmaNew):
+            v = np.random.uniform(-1,1)
+            x = individual_parent.sprinklers[i].center[0] + sigmaNew * v 
+            y = individual_parent.sprinklers[i].center[1] + sigmaNew * v 
         
-
-
+            if (not 0<x<actualMap.mapPoints.shape[0] or not 0<y<actualMap.mapPoints.shape[1]):
+                x = np.random.uniform(0,actualMap.mapPoints.shape[0])
+                y = np.random.uniform(0,actualMap.mapPoints.shape[1])
+            sprinkler = Sprinkler(center=(int(x),int(y)), radius=individual_parent.radius)
+            individualChild.addElem(sprinkler)     
+    else:
+         
+        for i in range(len(individual_parent.sprinklers)):
+            v = np.random.uniform(-1,1)
+            x = individual_parent.sprinklers[i].center[0] + sigmaNew * v 
+            y = individual_parent.sprinklers[i].center[1] + sigmaNew * v 
+            if (not 0<x<actualMap.mapPoints.shape[0] or not 0<y<actualMap.mapPoints.shape[1]):
+                x = np.random.uniform(0,actualMap.mapPoints.shape[0])
+                y = np.random.uniform(0,actualMap.mapPoints.shape[1])
+            sprinkler = Sprinkler(center=(int(x),int(y)), radius=individual_parent.radius)
+            individualChild.addElem(sprinkler)      
+         
+        for i in range(nSigmaNew):
+            x = np.random.uniform(0,actualMap.mapPoints.shape[0])
+            y = np.random.uniform(0,actualMap.mapPoints.shape[1])
+            sprinkler = Sprinkler(center=(int(x),int(y)), radius=individual_parent.radius)
+            individualChild.addElem(sprinkler) 
+              
+    return individualChild
 
 
 class Point:
@@ -116,6 +189,8 @@ class Point:
         self.is_wet = (ascii_char == "~")
         self.is_waterable = (ascii_char == ".")
 
+def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, itterationIndex, actualMap):
+    pass
 def display_map(map):
     """
     Function print map with ascii chars as lines
