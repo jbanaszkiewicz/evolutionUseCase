@@ -6,6 +6,7 @@ import random
 from math import sqrt, ceil
 import argparse
 from copy import deepcopy
+from collections import deque
 
 class Sprinkler:
     """
@@ -294,14 +295,19 @@ if __name__ == "__main__":
     map_path = "./maps/map1.json"
     radius = 2
     init_population_size = 50
-    iterrations = 10
+    iterations = 10
     init_sprinklers_nr = 10
+    sigma = 2
+    nSigma = 1
+    a = -3
+    b = 1
 
     maxSprinklers = 15
-    m = 10
+    historyMaxLength = 10
     c1 = 0.82
     c2 = 1.2
     maps = []
+    history = deque(maxlen=historyMaxLength)
     #zaladuj mapę do macierzy
     with open(map_path) as json_file:
         data_map0 = json.load(json_file)
@@ -318,11 +324,10 @@ if __name__ == "__main__":
     actualMap.drawIndividual(parent)
     plt.matshow(actualMap.mapDrawable, vmax=3)
     plt.show()
-    # plt.matshow(drawableMap, vmax=3)
-    # plt.show()
 
-    # algorithm = Algorithm(init_population_size, map_points, iterrations, radius, ratio_tmp_population=0.1)
-    # drawableMap_populations = []
+    for i in range(iterations):
+        parent, sigma, nSigma= mutationNew(parent, history, m, c1, c2, sigma, nSigma, i+1, actualMap, a, b)
+   
     # for i in range(init_population_size):
     #     filledInMap_population = fillInMap(map_points, algorithm.population[i])
     #     drawableMap_populations.append(convertMapDrawable(filledInMap_population))
