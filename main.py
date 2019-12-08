@@ -17,7 +17,7 @@ class Sprinkler:
         self.radius = radius
 
 class Individual:
-    def __init__(self, radius, first=False):
+    def __init__(self, radius):
         self.radius = radius
         self.sprinklers = []
     
@@ -30,13 +30,17 @@ class Individual:
     def addElem(self, sprinkler):
         self.sprinklers.append(sprinkler)
 
-    def generateIndividual(self, numElemMax, mapSize):
+    def generateIndividual(self, numElemMax, actualMap):
         """
         Generates whole individual, adding new sprinklers.
         mapSize :param: tuple with (x, y) size of the map
         """
-        numElem = np.random.uniform(1,numElemMax)
-        self.sprinklers = [Sprinkler(np.random.uniform(0, mapSize[0]), np.random.uniform(0, mapSize[0]), self.radius) for i in range(numElem)]
+
+        numElem = np.random.randint(1,numElemMax+1)
+        s1 = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
+        s2 = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
+        self.sprinklers = [Sprinkler((s1, s2), self.radius) for i in range(numElem)]
+        
     
     def getSprinklersAmmount(self):
         return len(self.sprinklers)
@@ -48,10 +52,10 @@ class Individual:
 class ActualMap:
     def __init__(self,  mapRaw):
         self.mapRaw = mapRaw #unchanged since the beggining
-        self.mapPoints = [[Point(elem) for elem in row] for row in self.mapRaw]
+        self.mapPoints = np.array(([[Point(elem) for elem in row] for row in self.mapRaw]))
+        self.mapPointsOrigin = deepcopy(self.mapPoints)
         self.mapDrawable = convertMapDrawable(self.mapPoints)
-        # max_sprinklers, _ , _ , _ = self.getMapStat(map)
-        # self.possible_sprinklers = self.getWaterableLocations()
+        self.mapDrawableOrigin = deepcopy(convertMapDrawable)
 
     def getWaterableLocations(self):
         waterable_locations = []
@@ -63,13 +67,15 @@ class ActualMap:
 
     def drawIndividual(self, individual):
         for sprinkler in individual.sprinklers:
-            rr, cc = circle(sprinkler.center[0], sprinkler.center[1], sprinkler.radius , np.shape(self.mapRaw))
+            rr, cc = circle(sprinkler.center[0], sprinkler.center[1], sprinkler.radius , np.shape(self.mapPoints))
             self.mapPoints[rr, cc] = Point("~")
+        for sprinkler in individual.sprinklers:
             self.mapPoints[sprinkler.center[0], sprinkler.center[1]] = Point("*")
-            for i, row in enumerate(self.mapPoints):
-                for j, elem in enumerate(row):
-                    if elem.is_waterable == False:
-                        self.mapPoints[i][j] = Point("#")
+        for i, row in enumerate(self.mapPointsOrigin):
+            for j, elem in enumerate(row):
+                if elem.is_wall == True:
+                    self.mapPoints[i, j] = Point("#")
+
         self.mapDrawable = convertMapDrawable(self.mapPoints)
 
     def getMapCoverage(self):
@@ -191,6 +197,7 @@ class Point:
         self.is_sprinkler = (ascii_char == "*")
         self.is_wet = (ascii_char == "~")
         self.is_waterable = (ascii_char == ".")
+        self.is_wall = (ascii_char == "#")
 
 def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, iterationIndex, actualMap, a, b):
     fi = sum(history)/ len(history)
@@ -221,9 +228,9 @@ def display_map(map):
 
 def convertMapDrawable(map_pts):
     drawableMap = []
-    for row in map_pts:
+    for i, row in enumerate(map_pts):
         new_row = []
-        for pt in row:
+        for j, pt in enumerate(row):
             if pt.is_sprinkler: 
                 new_row.append(3)
             elif pt.is_wet:
@@ -280,25 +287,41 @@ if __name__ == "__main__":
 
     # map_path = args.map
     map_path = "./maps/map1.json"
-    radius = 3
+    radius = 2
     init_population_size = 50
     iterrations = 10
     init_sprinklers_nr = 10
-    
 
+    maxSprinklers = 10
+    m = 10
+    c1 = 0.82
+    c2 = 1.2
+    maps = []
     #zaladuj mapę do macierzy
     with open(map_path) as json_file:
         data_map0 = json.load(json_file)
-    
+
+    firstMap = ActualMap(data_map0)
+    parent = Individual(3)   
+    parent.generateIndividual(maxSprinklers, firstMap)
+
+    #COMPLETED narysuj pusta mape
+    # plt.matshow(firstMap.mapDrawable, vmax=3)
+    # plt.show()
+    #TODO dodaj osobnika do mapy i narysuj uzupelniona mape
+    actualMap = deepcopy(firstMap)
+    actualMap.drawIndividual(parent)
+    plt.matshow(actualMap.mapDrawable, vmax=3)
+    plt.show()
     # plt.matshow(drawableMap, vmax=3)
     # plt.show()
 
-    algorithm = Algorithm(init_population_size, map_points, iterrations, radius, ratio_tmp_population=0.1)
-    drawableMap_populations = []
-    for i in range(init_population_size):
-        filledInMap_population = fillInMap(map_points, algorithm.population[i])
-        drawableMap_populations.append(convertMapDrawable(filledInMap_population))
-    plotAllMaps(np.array(drawableMap_populations), (50, 50), "Tytul")
+    # algorithm = Algorithm(init_population_size, map_points, iterrations, radius, ratio_tmp_population=0.1)
+    # drawableMap_populations = []
+    # for i in range(init_population_size):
+    #     filledInMap_population = fillInMap(map_points, algorithm.population[i])
+    #     drawableMap_populations.append(convertMapDrawable(filledInMap_population))
+    # plotAllMaps(np.array(drawableMap_populations), (50, 50), "Tytul")
 
     
     
