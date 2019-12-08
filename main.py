@@ -110,7 +110,7 @@ class ActualMap:
     
 
 def getFitness(individual, currentMap, a, b):
-    """
+    """vx
     Calculates fitness of the individual using function:
     f(nrSprinklers, mapCoverage) = a*nrSprinklers + b*mapCoverage
     """
@@ -128,16 +128,15 @@ def rateIndividual(individual, actualMap, a, b):
 def updateSigma(fi, c1, c2, sigma, nSigma, iterationIndex, m):
       
     if((iterationIndex % m) == 0): # co m iteraji wykonaj  zerowanie bufora i update sigm
-        history = []
-        history.append(1)   
+        history = [1]
           
-        if fi < 0.2:      
+        if round(fi, ndigits=1) < 0.2:      
             sigma = sigma * c1
-            nSigma = 1
-        elif fi > 0.2:
+            nSigma += 1
+        elif round(fi, ndigits=1) > 0.2:
             sigma = sigma * c2 
-            nSigma = 1
-        elif fi == 0.2:
+            nSigma -=1
+        elif round(fi, ndigits=1) == 0.2:
             sigma = sigma
             nSigma = nSigma
        
@@ -156,38 +155,68 @@ def chooseBetterIndividual(individual_parent, individual_child, history, actualM
 
 def makeChild(individual_parent, sigmaNew, nSigmaNew, actualMap):
     individualChild = Individual(individual_parent.radius)
-    #TODO mam wrażenie ze w tych if else dzieje sie to samo, ale troche w innej kolejnosci
-    if(nSigmaNew  < 0):
-             
-        for i in range(len(individual_parent.sprinklers) + nSigmaNew):
-            v = np.random.uniform(-1,1)
-            x = individual_parent.sprinklers[i].center[0] + sigmaNew * v 
-            y = individual_parent.sprinklers[i].center[1] + sigmaNew * v 
-        
-            if (not 0<x<actualMap.mapPoints.shape[0] or not 0<y<actualMap.mapPoints.shape[1]):
-                x = np.random.uniform(0,actualMap.mapPoints.shape[0])
-                y = np.random.uniform(0,actualMap.mapPoints.shape[1])
-            sprinkler = Sprinkler(center=(int(x),int(y)), radius=individual_parent.radius)
-            individualChild.addElem(sprinkler)     
-    else:
-         
-        for i in range(len(individual_parent.sprinklers)):
-            v = np.random.uniform(-1,1)
-            x = individual_parent.sprinklers[i].center[0] + sigmaNew * v 
-            y = individual_parent.sprinklers[i].center[1] + sigmaNew * v 
-            if (not 0<x<actualMap.mapPoints.shape[0] or not 0<y<actualMap.mapPoints.shape[1]):
-                x = np.random.uniform(0,actualMap.mapPoints.shape[0])
-                y = np.random.uniform(0,actualMap.mapPoints.shape[1])
-            sprinkler = Sprinkler(center=(int(x),int(y)), radius=individual_parent.radius)
-            individualChild.addElem(sprinkler)      
-         
+    list_sprinklers = individual_parent.sprinklers
+    random.shuffle(list_sprinklers)
+    if nSigmaNew<=0:
+        for i in range(len(list_sprinklers)+nSigmaNew):
+            vx = np.random.choice([1, -1])
+            vy = np.random.choice([1, -1])
+            x = list_sprinklers[i].center[0] + round(sigmaNew) * vx
+            y = list_sprinklers[i].center[1] + round(sigmaNew) * vy
+            while(x not in range(1, np.shape(actualMap.mapPoints)[0]-1) or y not in range(1, np.shape(actualMap.mapPoints)[1]-1)):
+                # print("nowa pozycja sprinklera nie moze byc poza mapa  (%d, %d)" % (x, y))
+                vx = np.random.choice([1, -1])
+                vy = np.random.choice([1, -1])
+                if (list_sprinklers[i].center[0] + round(sigmaNew) * vx) in range(0, np.shape(actualMap.mapPoints)[0]):
+                    x = list_sprinklers[i].center[0] + round(sigmaNew) * vx 
+                if list_sprinklers[i].center[1] + round(sigmaNew) * vy in range(0, np.shape(actualMap.mapPoints)[1]):
+                    y = list_sprinklers[i].center[1] + round(sigmaNew) * vy
+            while(actualMap.mapPoints[x, y].is_wall == True):
+                # print("nowa pozycja sprinklera nie moze byc w scianie lub poza mapa (%d, %d)" % (x, y))
+                x = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
+                y = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
+            individualChild.sprinklers.append(Sprinkler((x, y), individualChild.radius))
+    if nSigmaNew >0:
+        for i in range(len(list_sprinklers)):
+            vx = np.random.choice([1, -1])
+            vy = np.random.choice([1, -1])
+            x = list_sprinklers[i].center[0] + round(sigmaNew) * vx 
+            y = list_sprinklers[i].center[1] + round(sigmaNew) * vy 
+            while(x not in range(0, np.shape(actualMap.mapPoints)[0]) or y not in range(0, np.shape(actualMap.mapPoints)[1])):
+                # print("nowa pozycja sprinklera nie moze byc poza mapa  (%d, %d)" % (x, y))
+                vx = np.random.choice([1, -1])
+                vy = np.random.choice([1, -1])
+                if (list_sprinklers[i].center[0] + round(sigmaNew) * vx) in range(0, np.shape(actualMap.mapPoints)[0]):
+                    x = list_sprinklers[i].center[0] + round(sigmaNew) * vx 
+                if list_sprinklers[i].center[1] + round(sigmaNew) * vy in range(0, np.shape(actualMap.mapPoints)[1]):
+                    y = list_sprinklers[i].center[1] + round(sigmaNew) * vy
+            while(actualMap.mapPoints[x, y].is_wall == True):
+                # print("nowa pozycja sprinklera nie moze byc w scianie lub poza mapa (%d, %d)" % (x, y))
+                x = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
+                y = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
+            individualChild.sprinklers.append(Sprinkler((x, y), individualChild.radius))
+
         for i in range(nSigmaNew):
+            x = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
+            y = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
+            while(actualMap.mapPoints[x, y].is_wall == True):
+                # print("Probowano wstawic sprinklera na sciane (%d, %d)" % (x, y))
+                x = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
+                y = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
+            individualChild.sprinklers.append(Sprinkler((x, y), individualChild.radius)) 
+    return individualChild
+    """
+    for i in range(len(individual_parent.sprinklers)):
+        v = np.random.uniform(-1,1)
+        x = individual_parent.sprinklers[i].center[0] + sigmaNew * v 
+        y = individual_parent.sprinklers[i].center[1] + sigmaNew * v 
+        # if (not 0<x<actualMap.mapPoints.shape[0] or not 0<y<actualMap.mapPoints.shape[1]):
             x = np.random.uniform(0,actualMap.mapPoints.shape[0])
             y = np.random.uniform(0,actualMap.mapPoints.shape[1])
-            sprinkler = Sprinkler(center=(int(x),int(y)), radius=individual_parent.radius)
-            individualChild.addElem(sprinkler) 
-              
-    return individualChild
+        sprinkler = Sprinkler(center=(int(x),int(y)), radius=individual_parent.radius)
+        individualChild.addElem(sprinkler)     
+    
+    """
 
 
 class Point:
@@ -292,21 +321,21 @@ if __name__ == "__main__":
     # parser = argparse.ArgumentParser(description="Calculate evolution algorithm")
     # parser.add_argument('map', type=str, help="Source path with map of ascii chars")
     # parser.add_argument('radius', type=int, help="radius of single sprinkler field")
-    # parser.add_argument('init_population_size', type=int, help="Number of sprinkers in first population")    
+    # parser.add_argument('init_population_size', type=int, help="Number of sprinklers in first population")    
     # parser.add_argument('iterrations', type=int, help="Number of iterations in trening")
 
     
     # args = parser.parse_args()
 
     # map_path = args.map
-    map_path = "./maps/map1.json"
-    radius = 2
+    map_path = "./maps/map0.json"
+    radius = 4
     init_population_size = 50
     iterations = 100
     init_sprinklers_nr = 10
     sigma = 2
     nSigma = 1
-    a = 0.2 #wieksze faworyzuje wiecej sprinklerow
+    a = 0.1 #wieksze faworyzuje wiecej sprinklerow
     b = 1
 
     maxSprinklers = 15
