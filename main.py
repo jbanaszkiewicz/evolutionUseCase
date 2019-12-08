@@ -62,6 +62,8 @@ class ActualMap:
         self.mapPointsOrigin = deepcopy(self.mapPoints)
         self.mapDrawable = convertMapDrawable(self.mapPoints)
         self.mapDrawableOrigin = deepcopy(convertMapDrawable)
+        self.maxSprinklers = len(self.getWaterableLocations())
+        print("max sprinklers on the map: %d" % (self.maxSprinklers))
 
     def resetActualMap(self):
         self.mapPoints = deepcopy(self.mapPointsOrigin)
@@ -71,7 +73,7 @@ class ActualMap:
         waterable_locations = []
         for i, row in enumerate(self.mapPoints):
             for j, point in enumerate(row):
-                if point.is_waterable or point.is_wet or point.is_sprinkler:
+                if point.is_wall == False:
                     waterable_locations.append((i, j))
         return waterable_locations
 
@@ -112,7 +114,11 @@ def getFitness(individual, currentMap, a, b):
     Calculates fitness of the individual using function:
     f(nrSprinklers, mapCoverage) = a*nrSprinklers + b*mapCoverage
     """
-    return individual.getSprinklersAmmount()*a + actualMap.getMapCoverage()*b
+    maxSprinklers = currentMap.maxSprinklers
+    currentSprinklers = individual.getSprinklersAmmount()
+    sprinklers = (maxSprinklers-currentSprinklers)/maxSprinklers
+    mapCoverage = currentMap.getMapCoverage()
+    return sprinklers*a + (1-a)*mapCoverage
 
 def rateIndividual(individual, actualMap, a, b):
     currentMap = deepcopy(actualMap)
@@ -140,7 +146,7 @@ def updateSigma(fi, c1, c2, sigma, nSigma, iterationIndex, m):
 def chooseBetterIndividual(individual_parent, individual_child, history, actualMap, a, b):
     fp = rateIndividual(individual_parent, actualMap, a, b)
     fc = rateIndividual(individual_child, actualMap, a, b)
-
+    a = 3
     if (fc>fp):
         history.append(1)
         return individual_child
@@ -217,7 +223,7 @@ def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, iterationI
     individual = chooseBetterIndividual(individual_parent, individualChild, history, actualMap, a, b) 
     
     f = rateIndividual(individual, actualMap, a, b)
-    print("Iter ", iterationIndex,": ",f,"sigma: ",sigma, "nSigma: ",nSigma, "successRate: ", fi)
+    print("Iter ", iterationIndex," rate:   ",f,"sigma: ",sigma, "nSigma:   ",nSigma, "successRate:     ", fi)
     
     return individual, sigma, nSigma
 
@@ -300,7 +306,7 @@ if __name__ == "__main__":
     init_sprinklers_nr = 10
     sigma = 2
     nSigma = 1
-    a = -3
+    a = 0.2 #wieksze faworyzuje wiecej sprinklerow
     b = 1
 
     maxSprinklers = 15
