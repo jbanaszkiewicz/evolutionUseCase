@@ -144,10 +144,10 @@ def updateSigma(fi, c1, c2, sigma, nSigma, iterationIndex, m):
           
         if round(fi, ndigits=1) < 0.2:      
             sigma = sigma * c1
-            nSigma += 1
+            nSigma -= 1
         elif round(fi, ndigits=1) > 0.2:
             sigma = sigma * c2 
-            nSigma -=1
+            nSigma += 1
         elif round(fi, ndigits=1) == 0.2:
             sigma = sigma
             nSigma = nSigma
@@ -169,6 +169,7 @@ def makeChild(individual_parent, sigmaNew, nSigmaNew, actualMap):
     individualChild = Individual(individual_parent.radius)
     list_sprinklers = individual_parent.sprinklers
     random.shuffle(list_sprinklers)
+
     if nSigmaNew<=0:
         for i in range(len(list_sprinklers)+nSigmaNew):
             vx = np.random.choice([1, -1])
@@ -177,8 +178,8 @@ def makeChild(individual_parent, sigmaNew, nSigmaNew, actualMap):
             y = list_sprinklers[i].center[1] + round(sigmaNew) * vy
             while(x not in range(1, np.shape(actualMap.mapPoints)[0]-1) or y not in range(1, np.shape(actualMap.mapPoints)[1]-1)):
                 # print("nowa pozycja sprinklera nie moze byc poza mapa  (%d, %d)" % (x, y))
-                vx = np.random.choice([1, -1])
-                vy = np.random.choice([1, -1])
+                vx = np.random.choice([-1, 1])
+                vy = np.random.choice([-1, 1])
                 if (list_sprinklers[i].center[0] + round(sigmaNew) * vx) in range(0, np.shape(actualMap.mapPoints)[0]):
                     x = list_sprinklers[i].center[0] + round(sigmaNew) * vx 
                 if list_sprinklers[i].center[1] + round(sigmaNew) * vy in range(0, np.shape(actualMap.mapPoints)[1]):
@@ -190,14 +191,15 @@ def makeChild(individual_parent, sigmaNew, nSigmaNew, actualMap):
             individualChild.sprinklers.append(Sprinkler((x, y), individualChild.radius))
     if nSigmaNew >0:
         for i in range(len(list_sprinklers)):
-            vx = np.random.choice([1, -1])
-            vy = np.random.choice([1, -1])
+            #TODO zrobic losowanie bez zwracania i w ten sposob usunac przeszukiwanie do konca whilem
+            vx = np.random.choice([-1, 1])
+            vy = np.random.choice([-1, 1])
             x = list_sprinklers[i].center[0] + round(sigmaNew) * vx 
             y = list_sprinklers[i].center[1] + round(sigmaNew) * vy 
             while(x not in range(0, np.shape(actualMap.mapPoints)[0]) or y not in range(0, np.shape(actualMap.mapPoints)[1])):
                 # print("nowa pozycja sprinklera nie moze byc poza mapa  (%d, %d)" % (x, y))
-                vx = np.random.choice([1, -1])
-                vy = np.random.choice([1, -1])
+                vx = np.random.choice([-1, 1])
+                vy = np.random.choice([-1, 1])
                 if (list_sprinklers[i].center[0] + round(sigmaNew) * vx) in range(0, np.shape(actualMap.mapPoints)[0]):
                     x = list_sprinklers[i].center[0] + round(sigmaNew) * vx 
                 if list_sprinklers[i].center[1] + round(sigmaNew) * vy in range(0, np.shape(actualMap.mapPoints)[1]):
@@ -342,8 +344,7 @@ if __name__ == "__main__":
     with open(map_path) as json_file:
         data_map = json.load(json_file)
     actualMap = ActualMap(data_map)
-    map_shape = actualMap.mapPoints.shape
-    print("Rozmiar mapy: (%d, %d)" % map_shape)
+   
     
 
     parent = Individual(radius)   
