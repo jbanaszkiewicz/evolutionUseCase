@@ -63,6 +63,10 @@ class ActualMap:
         self.mapDrawable = convertMapDrawable(self.mapPoints)
         self.mapDrawableOrigin = deepcopy(convertMapDrawable)
 
+    def resetActualMap(self):
+        self.mapPoints = deepcopy(self.mapPointsOrigin)
+        self.mapDrawable = deepcopy(self.mapDrawableOrigin)
+
     def getWaterableLocations(self):
         waterable_locations = []
         for i, row in enumerate(self.mapPoints):
@@ -144,9 +148,6 @@ def chooseBetterIndividual(individual_parent, individual_child, history, actualM
         history.append(0)
         return individual_parent
 
-def chooseBestIndividual():
-    #TODO napisać funkcję, ktora wybierze najlepszego osobnika z całej historii.
-    pass
 def makeChild(individual_parent, sigmaNew, nSigmaNew, actualMap):
     individualChild = Individual(individual_parent.radius)
     #TODO mam wrażenie ze w tych if else dzieje sie to samo, ale troche w innej kolejnosci
@@ -264,18 +265,18 @@ def convertMapDrawable(map_pts):
 #                 tmp_map_pts[i][j] = Point("#")
 #     return tmp_map_pts
 
-def plotAllMaps(maps, size, title):
+def plotAllMaps(maps, title):
        
     fig = plt.figure()
     fig.suptitle(title)    
     plt.axis('off')
-    numberOfMaps = np.shape(maps)[0]
+    numberOfMaps = len(maps)
     axis_size = ceil(sqrt(numberOfMaps))
     
     for i, m in enumerate(maps):
         f = fig.add_subplot(axis_size, axis_size,i+1)
         f.title.set_text(str(i+1))
-        plt.imshow(m)
+        plt.imshow(m.mapDrawable, vmax=3)
         
  
     plt.axis('off')
@@ -295,7 +296,7 @@ if __name__ == "__main__":
     map_path = "./maps/map1.json"
     radius = 2
     init_population_size = 50
-    iterations = 10
+    iterations = 100
     init_sprinklers_nr = 10
     sigma = 2
     nSigma = 1
@@ -308,26 +309,33 @@ if __name__ == "__main__":
     c2 = 1.2
     maps = []
     history = deque(maxlen=historyMaxLength)
+    history.append(1)
     #zaladuj mapę do macierzy
     with open(map_path) as json_file:
         data_map0 = json.load(json_file)
 
-    firstMap = ActualMap(data_map0)
+    actualMap = ActualMap(data_map0)
     parent = Individual(3)   
-    parent.generateIndividual(maxSprinklers, firstMap)
+    parent.generateIndividual(maxSprinklers, actualMap)
 
     #COMPLETED narysuj pusta mape
     # plt.matshow(firstMap.mapDrawable, vmax=3)
     # plt.show()
     #TODO dodaj osobnika do mapy i narysuj uzupelniona mape
-    actualMap = deepcopy(firstMap)
-    actualMap.drawIndividual(parent)
-    plt.matshow(actualMap.mapDrawable, vmax=3)
-    plt.show()
+    
+    # actualMap = deepcopy(firstMap)
+    # actualMap.drawIndividual(parent)
+    # plt.matshow(actualMap.mapDrawable, vmax=3)
+    # plt.show()
 
     for i in range(iterations):
-        parent, sigma, nSigma= mutationNew(parent, history, m, c1, c2, sigma, nSigma, i+1, actualMap, a, b)
-   
+        parent, sigma, nSigma = mutationNew(parent, history, historyMaxLength, c1, c2, sigma, nSigma, i+1, actualMap, a, b)
+        actualMap.drawIndividual(parent)
+        maps.append(deepcopy(actualMap))
+        actualMap.resetActualMap()
+    plotAllMaps(maps, "Wykresiki" )
+
+
     # for i in range(init_population_size):
     #     filledInMap_population = fillInMap(map_points, algorithm.population[i])
     #     drawableMap_populations.append(convertMapDrawable(filledInMap_population))
