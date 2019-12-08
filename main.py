@@ -132,6 +132,9 @@ def chooseBetterIndividual(individual_parent, individual_child, history, actualM
         history.append(0)
         return individual_parent
 
+def chooseBestIndividual():
+    #TODO napisać funkcję, ktora wybierze najlepszego osobnika z całej historii.
+    pass
 def makeChild(individual_parent, sigmaNew, nSigmaNew, actualMap):
     individualChild = Individual(individual_parent.radius)
     #TODO mam wrażenie ze w tych if else dzieje sie to samo, ale troche w innej kolejnosci
@@ -189,8 +192,21 @@ class Point:
         self.is_wet = (ascii_char == "~")
         self.is_waterable = (ascii_char == ".")
 
-def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, itterationIndex, actualMap):
-    pass
+def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, iterationIndex, actualMap, a, b):
+    fi = sum(history)/ len(history)
+    
+    sigma, nSigma = updateSigma(fi, c1,c2, sigma, nSigma, iterationIndex, m)
+    
+          
+    individualChild = makeChild(individual_parent, sigma, nSigma, actualMap)
+        
+    individual = chooseBetterIndividual(individual_parent, individualChild, history, actualMap, a, b) 
+    
+    f = rateIndividual(individual, actualMap, a, b)
+    print("Iter ", iterationIndex,": ",f,"sigma: ",sigma, "nSigma: ",nSigma, "successRate: ", fi)
+    
+    return individual, sigma, nSigma
+
 def display_map(map):
     """
     Function print map with ascii chars as lines
