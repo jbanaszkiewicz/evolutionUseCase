@@ -325,13 +325,13 @@ if __name__ == "__main__":
     # args = parser.parse_args()
 
     # map_path = args.map
-    map_path = "./maps/map1.json"
-    radius = 2
+    map_path = "./maps/map2.json"
+    radius = 10
     init_population_size = 50
-    iterations = 1000
+    iterations = 10
     init_sprinklers_nr = 10
     sigma = 2
-    nSigma = 1
+    nSigma = 10
     a = 0.5 #wieksze faworyzuje mniej sprinklerow
     b = 1
 
@@ -350,7 +350,7 @@ if __name__ == "__main__":
     print("Rozmiar mapy: (%d, %d)" % map_shape)
     
 
-    parent = Individual(3)   
+    parent = Individual(radius)   
     parent.generateIndividual(maxSprinklers, actualMap)
     actualMap.drawIndividual(parent)
     
@@ -365,6 +365,7 @@ if __name__ == "__main__":
         maps.append(deepcopy(actualMap))
         actualMap.resetActualMap()
     plotAllMaps(maps[-10:], "Wykresiki" )
+    plotAllMaps(maps[-2:], "Wykresiki" )
 
 
     # for i in range(init_population_size):
