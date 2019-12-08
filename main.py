@@ -42,7 +42,7 @@ class Individual:
             s1 = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
             s2 = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
             while(actualMap.mapPoints[s1, s2].is_wall == True):
-                print("Probowano wstawic sprinklera na sciane (%d, %d)" % (s1, s2))
+                # print("Probowano wstawic sprinklera na sciane (%d, %d)" % (s1, s2))
                 s1 = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
                 s2 = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
             self.sprinklers.append(Sprinkler((s1, s2), self.radius))
@@ -77,6 +77,14 @@ class ActualMap:
                     waterable_locations.append((i, j))
         return waterable_locations
 
+    def getWallLocations(self):
+        wall_locations = []
+        for i, row in enumerate(self.mapPoints):
+            for j, point in enumerate(row):
+                if point.is_wall == True:
+                    wall_locations.append((i, j))
+        return wall_locations
+
     def drawIndividual(self, individual):
         for sprinkler in individual.sprinklers:
             rr, cc = circle(sprinkler.center[0], sprinkler.center[1], sprinkler.radius , np.shape(self.mapPoints))
@@ -94,6 +102,7 @@ class ActualMap:
         counter_waterable = 0 
         counter_wet = 0
         counter_sprinklers = 0
+        counter_wall = 0
         
         for row in self.mapPoints:
             for point in row:
@@ -103,6 +112,8 @@ class ActualMap:
                     counter_waterable += 1
                 if point.is_wet:
                     counter_wet += 1
+                if point.is_wall:
+                    counter_wall +=1
         counter_wet +=counter_sprinklers
         counter_waterable += counter_wet
         ratio_coverage = counter_wet/counter_waterable
@@ -118,6 +129,7 @@ def getFitness(individual, currentMap, a, b):
     currentSprinklers = individual.getSprinklersAmmount()
     sprinklers = (maxSprinklers-currentSprinklers)/maxSprinklers
     mapCoverage = currentMap.getMapCoverage()
+    print("Sprinklers:  %f  Coverage:   %f" % (sprinklers, mapCoverage))
     return sprinklers*a + (1-a)*mapCoverage
 
 def rateIndividual(individual, actualMap, a, b):
@@ -284,21 +296,6 @@ def convertMapDrawable(map_pts):
         drawableMap.append(new_row)
     return drawableMap
 
-# def fillInMap(clean_map_pts, individual):
-#     tmp_map_pts = np.copy(clean_map_pts)
-#     sprinklers_locations = individual.sprinklers_locations
-#     radius = individual.radius
-#     print(f"radius: {radius}")
-#     for location in sprinklers_locations:
-#         rr, cc = circle(location[0], location[1], radius , np.shape(clean_map_pts))
-#         tmp_map_pts[rr, cc] = Point("~")
-#     for location in sprinklers_locations:
-#         tmp_map_pts[location[0]][location[1]] = Point("*")
-#     for i, row in enumerate(clean_map_pts):
-#         for j, elem in enumerate(row):
-#             if elem.is_waterable == False:
-#                 tmp_map_pts[i][j] = Point("#")
-#     return tmp_map_pts
 
 def plotAllMaps(maps, title):
        
@@ -328,17 +325,17 @@ if __name__ == "__main__":
     # args = parser.parse_args()
 
     # map_path = args.map
-    map_path = "./maps/map0.json"
-    radius = 4
+    map_path = "./maps/map1.json"
+    radius = 2
     init_population_size = 50
-    iterations = 100
+    iterations = 1000
     init_sprinklers_nr = 10
     sigma = 2
     nSigma = 1
-    a = 0.1 #wieksze faworyzuje wiecej sprinklerow
+    a = 0.5 #wieksze faworyzuje mniej sprinklerow
     b = 1
 
-    maxSprinklers = 15
+    maxSprinklers = 1
     historyMaxLength = 10
     c1 = 0.82
     c2 = 1.2
@@ -347,18 +344,17 @@ if __name__ == "__main__":
     history.append(1)
     #zaladuj mapę do macierzy
     with open(map_path) as json_file:
-        data_map0 = json.load(json_file)
+        data_map = json.load(json_file)
+    actualMap = ActualMap(data_map)
+    map_shape = actualMap.mapPoints.shape
+    print("Rozmiar mapy: (%d, %d)" % map_shape)
+    
 
-    actualMap = ActualMap(data_map0)
     parent = Individual(3)   
     parent.generateIndividual(maxSprinklers, actualMap)
-
-    #COMPLETED narysuj pusta mape
-    # plt.matshow(firstMap.mapDrawable, vmax=3)
-    # plt.show()
-    #TODO dodaj osobnika do mapy i narysuj uzupelniona mape
+    actualMap.drawIndividual(parent)
     
-    # actualMap = deepcopy(firstMap)
+
     # actualMap.drawIndividual(parent)
     # plt.matshow(actualMap.mapDrawable, vmax=3)
     # plt.show()
@@ -368,7 +364,7 @@ if __name__ == "__main__":
         actualMap.drawIndividual(parent)
         maps.append(deepcopy(actualMap))
         actualMap.resetActualMap()
-    plotAllMaps(maps, "Wykresiki" )
+    plotAllMaps(maps[-10:], "Wykresiki" )
 
 
     # for i in range(init_population_size):
