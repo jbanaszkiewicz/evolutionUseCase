@@ -137,17 +137,17 @@ def rateIndividual(individual, actualMap, a):
     currentMap.drawIndividual(individual)
     return getFitness(individual, currentMap, a) 
 
-def updateSigma(fi, c1, c2, sigma, nSigma, iterationIndex, m):
+def updateSigma(history, c1, c2, sigma, nSigma, iterationIndex, m):
       
     if((iterationIndex % m) == 0): # co m iteraji wykonaj  zerowanie bufora i update sigm
-        history = [1]
-          
+        fi = sum(history)/ len(history)
+
         if round(fi, ndigits=1) < 0.2:      
             sigma = sigma * c1
-            nSigma -= 1
+            nSigma = 1
         elif round(fi, ndigits=1) > 0.2:
             sigma = sigma * c2 
-            nSigma += 1
+            nSigma = 1
         elif round(fi, ndigits=1) == 0.2:
             sigma = sigma
             nSigma = nSigma
@@ -160,10 +160,10 @@ def chooseBetterIndividual(individual_parent, individual_child, history, actualM
     a = 3
     if (fc>fp):
         history.append(1)
-        return individual_child
+        return individual_child, history
     else:
         history.append(0)
-        return individual_parent
+        return individual_parent, history
 
 def makeChild(individual_parent, sigmaNew, nSigmaNew, actualMap):
     individualChild = Individual(individual_parent.radius)
@@ -244,19 +244,18 @@ class Point:
         self.is_wall = (ascii_char == "#")
 
 def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, iterationIndex, actualMap, a):
-    fi = sum(history)/ len(history)
-    
-    sigma, nSigma = updateSigma(fi, c1,c2, sigma, nSigma, iterationIndex, m)
-    
-          
+        
+    sigma, nSigma = updateSigma(history, c1,c2, sigma, nSigma, iterationIndex, m)
+              
     individualChild = makeChild(individual_parent, sigma, nSigma, actualMap)
         
-    individual = chooseBetterIndividual(individual_parent, individualChild, history, actualMap, a) 
+    individual, history = chooseBetterIndividual(individual_parent, individualChild, history, actualMap, a) 
     
+    fi = sum(history)/ len(history)
     f = rateIndividual(individual, actualMap, a)
-    print("Iter ", iterationIndex," rate:   ",f,"sigma: ",sigma, "nSigma:   ",nSigma, "successRate:     ", fi)
+    print("Iter ", iterationIndex," rate:   ",f,"sigma: ",sigma, "nSigma:   ",nSigma, "successRate:     ", fi, "spri._count:", len(individual.sprinklers))
     
-    return individual, sigma, nSigma
+    return individual, sigma, nSigma, history
 
 def display_map(map):
     """
@@ -315,13 +314,13 @@ if __name__ == "__main__":
     # args = parser.parse_args()
 
     # map_path = args.map
-    map_path = "./maps/map2.json"
-    radius = 10
-    iterations = 100
+    map_path = "./maps/map0.json"
+    radius = 4
+    iterations = 150
     init_sprinklers_nr = 10
     sigma = 2
     nSigma = 2
-    a = 0.1 #wieksze faworyzuje mniej sprinklerow
+    a = 0.8 #wieksze faworyzuje mniej sprinklerow
     historyMaxLength = 10
     c1 = 0.82
     c2 = 1.2
@@ -343,12 +342,13 @@ if __name__ == "__main__":
     # actualMap.drawIndividual(parent)
     # plt.matshow(actualMap.mapDrawable, vmax=3)
     # plt.show()
-
-    for i in range(iterations):
-        parent, sigma, nSigma = mutationNew(parent, history, historyMaxLength, c1, c2, sigma, nSigma, i+1, actualMap, a)
+    i = 0
+    while (sigma > 0.01):
+        parent, sigma, nSigma, history = mutationNew(parent, history, historyMaxLength, c1, c2, sigma, nSigma, i+1, actualMap, a)
         actualMap.drawIndividual(parent)
         maps.append(deepcopy(actualMap))
         actualMap.resetActualMap()
+        i=i+1
     plotAllMaps(maps[-10:], "Wykresiki" )
     plotAllMaps(maps[-2:], "Wykresiki" )
 
