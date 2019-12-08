@@ -219,18 +219,6 @@ def makeChild(individual_parent, sigmaNew, nSigmaNew, actualMap):
                 y = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
             individualChild.sprinklers.append(Sprinkler((x, y), individualChild.radius)) 
     return individualChild
-    """
-    for i in range(len(individual_parent.sprinklers)):
-        v = np.random.uniform(-1,1)
-        x = individual_parent.sprinklers[i].center[0] + sigmaNew * v 
-        y = individual_parent.sprinklers[i].center[1] + sigmaNew * v 
-        # if (not 0<x<actualMap.mapPoints.shape[0] or not 0<y<actualMap.mapPoints.shape[1]):
-            x = np.random.uniform(0,actualMap.mapPoints.shape[0])
-            y = np.random.uniform(0,actualMap.mapPoints.shape[1])
-        sprinkler = Sprinkler(center=(int(x),int(y)), radius=individual_parent.radius)
-        individualChild.addElem(sprinkler)     
-    
-    """
 
 
 class Point:
@@ -329,10 +317,10 @@ if __name__ == "__main__":
     # map_path = args.map
     map_path = "./maps/map2.json"
     radius = 10
-    iterations = 10
+    iterations = 100
     init_sprinklers_nr = 10
     sigma = 2
-    nSigma = 10
+    nSigma = 2
     a = 0.1 #wieksze faworyzuje mniej sprinklerow
     historyMaxLength = 10
     c1 = 0.82
