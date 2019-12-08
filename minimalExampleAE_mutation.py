@@ -148,8 +148,8 @@ def make_child(osobnik_parent, sigmaNew, nSigmaNew, mapSize):
              y = osobnik_parent.T[i].y + sigmaNew * v 
         
          if (x < 0 or x > mapSize or y <0 or y > mapSize):
-             x = np.random.uniform(1,mapSize)
-             y = np.random.uniform(1,mapSize)
+             x = np.random.uniform(1,mapSize) #TODO powinno byc od 0 Tomek
+             y = np.random.uniform(1,mapSize) #TODO powinno byc od 0 Tomek
              t = tryskacz(int(x),int(y))
          else:
              t = tryskacz(int(x),int(y))        
