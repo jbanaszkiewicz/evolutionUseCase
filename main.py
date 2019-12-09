@@ -12,7 +12,8 @@ from math import pi
 class Sprinkler:
     """
     Definition of the prinkler
-    center :param: tuple coordinates of the sprinkler
+    center :param: tuple coordinates of the sprinkler           type: tuple
+    radius :param: radius of the circle field of the sprinkler  type: int
     """
     def __init__(self, center, radius):
         self.center = center
@@ -24,19 +25,15 @@ class Individual:
         self.sprinklers = []
         self.sprinklerField = pi*self.radius*self.radius
     
-        # if first == True:
-        #     self.chooseFirstSprinklers(sprinklers_locations)
-        # else:
-        #     self.sprinklers_locations = sprinklers_locations
-        # self.sprinklers_sdv = [radius*2 for idx in range(len(sprinklers_locations))]
 
     def addElem(self, sprinkler):
         self.sprinklers.append(sprinkler)
 
     def generateIndividual(self, numElemMax, actualMap):
         """
-        Generates whole individual, adding new sprinklers.
-        mapSize :param: tuple with (x, y) size of the map
+        Generates whole individual, adding new sprinklers in random locations.
+        numElemMax :param: maximum ammoount of possible sprinklers  type: int
+        actualMap :param: map where individual would be generated   type: ActualMap
         """
 
         numElem = np.random.randint(1,numElemMax+1)
@@ -52,10 +49,6 @@ class Individual:
     
     def getSprinklersAmmount(self):
         return len(self.sprinklers)
-
-    # def chooseFirstSprinklers(self, possible_sprinklers):
-    #     sprinklers_idxs = [random.randint(0, len(possible_sprinklers)-1) for i in range(random.randint(1, len(possible_sprinklers)))]    
-    #     self.sprinklers_locations = [possible_sprinklers[idx] for idx in sprinklers_idxs]
 
 class ActualMap:
     def __init__(self,  mapRaw):

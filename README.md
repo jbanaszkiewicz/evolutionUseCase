@@ -21,7 +21,36 @@ argparse
 copy
 collections
 ```
+## Mapy
+Mapy zdefiniowano w formie plików json. Mapy są uszeregowano według zasady: 0 - najprostsza N- najbardziej skomplikowna
 ## Rozpatrywane algorytmy
 Rozpatrywano i zaimplementowano dwa typy algorytmów ewolucyjnych:
 * algorytm (1+1)
+Pełna wersja algorytmu (1+1) została zdefiniowana w pliku [main](./main.py)
 * algorytm (μ, λ)
+
+## Zdefiniowane struktury
+W pliku [main](./main.py) zdefiniowano następujące struktury:
+```python
+class Sprinkler
+```
+Klasa ta definiuje pojedyńczy tryskacz
+```python
+class Point
+```
+
+```python 
+class Individual
+```
+Klasa ta definiuje osobnika. Pojedyńczy osobnik to zbiór tryskaczy. Zadaniem algorytmu jest znalezienie najlepszego osobnika w procesie ewolucji (Problem sprowadza się więc do znalezienia optymalnego rozłożenia tryskaczy).
+
+```python 
+class ActualMap
+```
+Klasa definiuje mapę. Jest to główna klasa w programie, która organizuje działanie algorytmu.
+Zdefiniowano w niej kilka kluczowych atrybutów:
+```python
+self.mapRaw #przechowuje czystą mapę  w postaci znaków ASCII bez osobnika
+self.mapPointsOrigin #przechowuje mapę definiowaną jako zbiór obiektów typu Points
+``` 
+
