@@ -103,7 +103,7 @@ gdzie:<br/>
 
 ## Wyniki
 Wyniki działania są prezentowane na dwa sposoby:
-1. Wykres kolejnych wartości funkcji przystosowania dla kolejnych osobników
+1. Wykres kolejnych wartości funkcji przystosowania dla kolejnych osobników, zmiana sigma & nSigma <br/>
 ![](results/r1_progress.png)<br/>
 2. Wizualizacja osobnika na mapie w kolejnych iteracjach.
 ![](results/r1_-100.png)<br/>
