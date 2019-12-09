@@ -8,7 +8,9 @@ import argparse
 from copy import deepcopy
 from collections import deque
 from math import pi
-
+FITNESS_VALUES = []
+SIGMA_ITERS = []
+NSIGMA_ITERS = []
 class Sprinkler:
     """
     Definition of the prinkler
@@ -290,6 +292,9 @@ def mutationNew(individual_parent, history, m, c1, c2, sigma,nNegativeSigma,nPos
     
     fi = sum(history)/ len(history)
     f = rateIndividual(individual, actualMap, a)
+    FITNESS_VALUES.append(f)
+    SIGMA_ITERS.append(sigma)
+    NSIGMA_ITERS.append(nSigma)
     print("Iter ", iterationIndex," rate:   ",f,"sigma: ",sigma, "nSigma:   ",nSigma, "successRate:     ", fi, "spri._count:", len(individual.sprinklers))
     
     return individual, sigma, nNegativeSigma, nPositiveSigma, history, noChangeCounter
@@ -340,6 +345,19 @@ def plotAllMaps(maps, title):
     plt.axis('off')
     plt.show() 
 
+def plotFigures(figures, title):
+    fig = plt.figure()
+    fig.suptitle(title)    
+    plt.axis('off')
+    numberOfFigures = len(figures)
+    axis_size = ceil(sqrt(numberOfFigures))
+    plt.subplots_adjust(hspace=0.4)
+    for i, key in enumerate(figures):
+        f = fig.add_subplot(axis_size, axis_size,i+1)
+        f.title.set_text(key)
+        plt.plot(figures[key])
+    plt.show()
+
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(description="Calculate evolution algorithm")
     # parser.add_argument('map', type=str, help="Source path with map of ascii chars")
@@ -370,7 +388,7 @@ if __name__ == "__main__":
    
     map_path = "./maps/map6.json"
     radius = 4
-    iterations = 400
+    iterations = 5
     init_sprinklers_nr = 3
     sigma = 4
     nPositiveSigma = 1
@@ -412,3 +430,4 @@ if __name__ == "__main__":
     plotAllMaps(maps[:100], "first 100" )    
     plotAllMaps(maps[-100:], "last 100" )
     plotAllMaps(maps[-10:], "last 10" )
+    plotFigures({"fitness": FITNESS_VALUES,"sigma": SIGMA_ITERS,"nSigma": NSIGMA_ITERS}, "Progres treningowy")
