@@ -40,7 +40,7 @@ class Point
 Definiuje pojedyńczy punkt ma mapie. Ma 4 kluczowe atrybuty:
 is_sprinkler - w punkcie znajduje się tryskacz
 self.is_wet -  punkt jest w zasięgu tryskacza
-self.is_waterable - w punkcie może się znajdować tryskacz
+self.is_waterable - pole moze zostac polane
 self.is_wall - w punkcie jest ściana (obszar niedostępny)
 ```
 ```python 
@@ -101,7 +101,7 @@ gdzie:<br/>
 ![](equations/sprinklersMap.png)<br/>
 ![](equations/coverageMap.png)<br/>
 
-## Wyniki
+## Przykładowa prezentacja wyników
 Wyniki działania są prezentowane na dwa sposoby:
 1. Wykres kolejnych wartości funkcji przystosowania dla kolejnych osobników, zmiana sigma & nSigma <br/>
 ![](results/r4_progress.png)<br/>
