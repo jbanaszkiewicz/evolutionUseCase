@@ -301,15 +301,31 @@ def plotAllMaps(maps, title):
     plt.show() 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(description="Calculate evolution algorithm")
-    # parser.add_argument('map', type=str, help="Source path with map of ascii chars")
-    # parser.add_argument('radius', type=int, help="radius of single sprinkler field")
-    # parser.add_argument('init_population_size', type=int, help="Number of sprinklers in first population")    
-    # parser.add_argument('iterrations', type=int, help="Number of iterations in trening")
+    parser = argparse.ArgumentParser(description="Calculate evolution algorithm")
+    parser.add_argument('map', type=str, help="Source path with map of ascii chars")
+    parser.add_argument('radius', type=int, help="radius of single sprinkler field")
+    parser.add_argument('iterations', type=int, help="Number of iterations in trening")
+    parser.add_argument('initSprinklersNr', type=int, help="Number of sprinklers in first population")    
+    parser.add_argument('a', type=float ,help="Parameter of fitness funcion in range <0,1>")    
+    parser.add_argument('--sigma', type=int, default=2, help="Defines random disturbance from normal distribution of the child's position. As default 2")
+    parser.add_argument('--nSigma', type=int, default=2, help="Defines random disturbance from normal distribution of child's ammount of sprinklers. As default 2")
+    parser.add_argument('--c1', type=float, default=1.2, help="Parameter of (1+1) function. As default 1.2")
+    parser.add_argument('--c2', type=float, default=0.82, help="Parameter of (1+1) function. As default 1.2")    
+    parser.add_argument('--historyMax', type=int, choices=range(0, 20), default=10, help="Length of list history, which keeps history of changing and not changing parent to child ")
 
     
-    # args = parser.parse_args()
-
+    args = parser.parse_args()
+    map_path = args.map
+    radius = args.radius
+    iterations = args.iterations
+    init_sprinklers_nr = args.initSprinklersNr
+    sigma = args.sigma
+    nSigma = args.nSigma
+    a = args.a #wieksze faworyzuje mniej sprinklerow
+    historyMaxLength = args.historyMax
+    c1 = 0.82
+    c2 = 1.2
+    """
     # map_path = args.map
     map_path = "./maps/map5.json"
     radius = 4
@@ -321,6 +337,7 @@ if __name__ == "__main__":
     historyMaxLength = 10
     c1 = 0.82
     c2 = 1.2
+    """
     maps = []
     history = deque(maxlen=historyMaxLength)
     history.append(1)
