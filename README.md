@@ -57,5 +57,46 @@ self.mapRaw - przechowuje czystą mapę  w postaci znaków ASCII bez osobnika
 self.mapPointsOrigin, self.mapPoints - przechowuje mapę definiowaną jako zbiór obiektów typu Points
 self.mapDrawableOrigin, self.mapDrawable - przechowuje mapę w postaci przystosowanej do wyświetlania przez matplotlib 
 ``` 
-## Uruchomienie algorytmy
-Algorytm wywoluje się z wykorzystaniem 
+## Uruchomienie algorytmu
+Algorytm wywoluje się z przykładowymi argumentami:
+```sh
+python main.py ./maps/map0.json 3 10 10 0.2
+```
+ z wykorzystaniem parsowania argumentów.
+```sh
+positional arguments:
+  map                   Source path with map of ascii chars
+  radius                radius of single sprinkler field
+  iterations            Number of iterations in trening
+  initSprinklersNr      Number of sprinklers in first population
+  a                     Parameter of fitness funcion in range <0,1>
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --sigma SIGMA         Defines random disturbance from normal distribution of
+                        the childs position. As default 2
+  --nSigma NSIGMA       Defines random disturbance from normal distribution of
+                        childs ammount of sprinklers. As default 2
+  --c1 C1               Parameter of (1+1) function. As default 1.2
+  --c2 C2               Parameter of (1+1) function. As default 1.2
+  --historyMax          Length of list history, which keeps history of
+                        changing and not changing parent to child
+```
+## Proces treningu
+W celu prowadzenia treningu wykorzystuje się funkcję 
+```python
+def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, iterationIndex, actualMap, a)
+```
+Funkcja ta przechwytuje kolejne osobniki, update'uje zaburzebia osobnika sigma & nSigma, tworzy nowego osbnika, wybiera lepszego i go ocenia.
+Operracje te są powtarzane aż do osiągnięcia warunku końcowego.
+
+## Funkcja przystosowania
+Funckcja przystosowania została zdefiniowana jako:
+```python
+def getFitness(individual, currentMap, a)
+```
+Jest ona zdefiniowana równaniem:
+![](equations/fitnessFunction.png)
+gdzie:
+![](equations/sprinklersMap.png)
+![](equations/coverageMap.png)
