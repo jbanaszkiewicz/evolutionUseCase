@@ -100,3 +100,11 @@ Jest ona zdefiniowana równaniem: <br/>
 gdzie:<br/>
 ![](equations/sprinklersMap.png)<br/>
 ![](equations/coverageMap.png)<br/>
+
+## Wyniki
+Wyniki działania są prezentowane na dwa sposoby:
+1. Wykres kolejnych wartości funkcji przystosowania dla kolejnych osobników
+![](results/r1_progress.png)<br/>
+2. Wizualizacja osobnika na mapie w kolejnych iteracjach.
+![](results/r1_-100.png)<br/>
+![](results/r1_last.png)<br/>
