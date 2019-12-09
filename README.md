@@ -95,8 +95,8 @@ Funckcja przystosowania została zdefiniowana jako:
 ```python
 def getFitness(individual, currentMap, a)
 ```
-Jest ona zdefiniowana równaniem:
-![](equations/fitnessFunction.png)
-gdzie:
-![](equations/sprinklersMap.png)
-![](equations/coverageMap.png)
+Jest ona zdefiniowana równaniem: <br/>
+![](equations/fitnessFunction.png)  <br/>
+gdzie:<br/>
+![](equations/sprinklersMap.png)<br/>
+![](equations/coverageMap.png)<br/>
