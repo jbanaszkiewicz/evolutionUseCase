@@ -33,24 +33,29 @@ Pełna wersja algorytmu (1+1) została zdefiniowana w pliku [main](./main.py)
 W pliku [main](./main.py) zdefiniowano następujące struktury:
 ```python
 class Sprinkler
-```
 Klasa ta definiuje pojedyńczy tryskacz
+```
 ```python
 class Point
+Definiuje pojedyńczy punkt ma mapie. Ma 4 kluczowe atrybuty:
+is_sprinkler - w punkcie znajduje się tryskacz
+self.is_wet -  punkt jest w zasięgu tryskacza
+self.is_waterable - w punkcie może się znajdować tryskacz
+self.is_wall - w punkcie jest ściana (obszar niedostępny)
 ```
-
 ```python 
 class Individual
-```
 Klasa ta definiuje osobnika. Pojedyńczy osobnik to zbiór tryskaczy. Zadaniem algorytmu jest znalezienie najlepszego osobnika w procesie ewolucji (Problem sprowadza się więc do znalezienia optymalnego rozłożenia tryskaczy).
-
+```
 ```python 
 class ActualMap
-```
 Klasa definiuje mapę. Jest to główna klasa w programie, która organizuje działanie algorytmu.
+```
 Zdefiniowano w niej kilka kluczowych atrybutów:
 ```python
-self.mapRaw #przechowuje czystą mapę  w postaci znaków ASCII bez osobnika
-self.mapPointsOrigin #przechowuje mapę definiowaną jako zbiór obiektów typu Points
+self.mapRaw - przechowuje czystą mapę  w postaci znaków ASCII bez osobnika
+self.mapPointsOrigin, self.mapPoints - przechowuje mapę definiowaną jako zbiór obiektów typu Points
+self.mapDrawableOrigin, self.mapDrawable - przechowuje mapę w postaci przystosowanej do wyświetlania przez matplotlib 
 ``` 
-
+## Uruchomienie algorytmy
+Algorytm wywoluje się z wykorzystaniem 
