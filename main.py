@@ -83,7 +83,7 @@ class ActualMap:
     def drawIndividual(self, individual):
         for sprinkler in individual.sprinklers:
             rr, cc = circle(sprinkler.center[0], sprinkler.center[1], sprinkler.radius , np.shape(self.mapPoints))
-            self.mapPoints[rr, cc] = Point("~")
+            self.mapPoints[rr, cc] = Point("~") #TODO w tej okolicy dodac funkcję ograniczającą zakres wody przez ścianę
         for sprinkler in individual.sprinklers:
             self.mapPoints[sprinkler.center[0], sprinkler.center[1]] = Point("*")
         for i, row in enumerate(self.mapPointsOrigin):
@@ -312,32 +312,31 @@ if __name__ == "__main__":
     parser.add_argument('--c1', type=float, default=1.2, help="Parameter of (1+1) function. As default 1.2")
     parser.add_argument('--c2', type=float, default=0.82, help="Parameter of (1+1) function. As default 1.2")    
     parser.add_argument('--historyMax', type=int, choices=range(0, 20), default=10, help="Length of list history, which keeps history of changing and not changing parent to child ")
-
     
-    args = parser.parse_args()
-    map_path = args.map
-    radius = args.radius
-    iterations = args.iterations
-    init_sprinklers_nr = args.initSprinklersNr
-    sigma = args.sigma
-    nSigma = args.nSigma
-    a = args.a #wieksze faworyzuje mniej sprinklerow
-    historyMaxLength = args.historyMax
-    c1 = 0.82
-    c2 = 1.2
-    """
+    # args = parser.parse_args()
     # map_path = args.map
-    map_path = "./maps/map5.json"
+    # radius = args.radius
+    # iterations = args.iterations
+    # init_sprinklers_nr = args.initSprinklersNr
+    # sigma = args.sigma
+    # nSigma = args.nSigma
+    # a = args.a #wieksze faworyzuje mniej sprinklerow
+    # historyMaxLength = args.historyMax
+    # c1 = 0.82
+    # c2 = 1.2
+
+
+    map_path = "./maps/map0.json"
     radius = 4
-    iterations = 150
+    iterations = 20
     init_sprinklers_nr = 10
     sigma = 2
     nSigma = 2
-    a = 0.8 #wieksze faworyzuje mniej sprinklerow
+    a = 0.2 #wieksze faworyzuje mniej sprinklerow
     historyMaxLength = 10
     c1 = 0.82
-    c2 = 1.2
-    """
+    c2 = 1.2    
+
     maps = []
     history = deque(maxlen=historyMaxLength)
     history.append(1)
@@ -346,18 +345,15 @@ if __name__ == "__main__":
         data_map = json.load(json_file)
     actualMap = ActualMap(data_map)
    
-    
-
     parent = Individual(radius)   
     parent.generateIndividual(init_sprinklers_nr, actualMap)
     actualMap.drawIndividual(parent)
     
-
     # actualMap.drawIndividual(parent)
     # plt.matshow(actualMap.mapDrawable, vmax=3)
     # plt.show()
-    i = 0
-    while (sigma > 0.01):
+
+    for i in range(iterations):
         parent, sigma, nSigma, history = mutationNew(parent, history, historyMaxLength, c1, c2, sigma, nSigma, i+1, actualMap, a)
         actualMap.drawIndividual(parent)
         maps.append(deepcopy(actualMap))
