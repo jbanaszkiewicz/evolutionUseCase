@@ -36,8 +36,9 @@ class Individual:
         actualMap :param: map where individual would be generated   type: ActualMap
         """
 
-        numElem = np.random.randint(1,numElemMax+1)
-        for i in range(numElem):
+        #numElem = np.random.randint(1,numElemMax+1)
+        
+        for i in range(numElemMax):
             s1 = np.random.randint(0, np.shape(actualMap.mapPoints)[0])
             s2 = np.random.randint(0, np.shape(actualMap.mapPoints)[1])
             while(actualMap.mapPoints[s1, s2].is_wall == True):
@@ -135,33 +136,52 @@ def rateIndividual(individual, actualMap, a):
     currentMap.drawIndividual(individual)
     return getFitness(individual, currentMap, a) 
 
-def updateSigma(history, c1, c2, sigma, nSigma, iterationIndex, m):
+def updateSigma(history, c1, c2, sigma, iterationIndex, m):
       
     if((iterationIndex % m) == 0): # co m iteraji wykonaj  zerowanie bufora i update sigm
         fi = sum(history)/ len(history)
 
         if round(fi, ndigits=1) < 0.2:      
             sigma = sigma * c1
-            nSigma = 1
+            
         elif round(fi, ndigits=1) > 0.2:
             sigma = sigma * c2 
-            nSigma = 1
+         
         elif round(fi, ndigits=1) == 0.2:
             sigma = sigma
-            nSigma = nSigma
+            
        
-    return sigma, nSigma
+    return sigma
 
-def chooseBetterIndividual(individual_parent, individual_child, history, actualMap, a):
+def chooseBetterIndividual(individual_parent, individual_childA,individual_childB, individual_childC, history, actualMap, a):
     fp = rateIndividual(individual_parent, actualMap, a)
-    fc = rateIndividual(individual_child, actualMap, a)
-    a = 3
-    if (fc>fp):
+    fca = rateIndividual(individual_childA, actualMap, a)
+    fcb = rateIndividual(individual_childB, actualMap, a)
+    fcc = rateIndividual(individual_childC, actualMap, a)
+
+    fc = 0
+    betterChild = Individual(0)
+    if(fca > fcb):
+        betterChild = individual_childA
+        fc = fca
+        winnerIdx = 1
+    else:    
+        betterChild = individual_childB
+        fc = fcb
+        winnerIdx = 2
+
+    if(fcc > fc):
+        betterChild = individual_childC
+        fc = fcc
+        winnerIdx = 3
+    
+    if (fp <= fc):
         history.append(1)
-        return individual_child, history
+        return betterChild, history, winnerIdx
     else:
         history.append(0)
-        return individual_parent, history
+        winnerIdx = 4
+        return individual_parent, history, winnerIdx
 
 def makeChild(individual_parent, sigmaNew, nSigmaNew, actualMap):
     individualChild = Individual(individual_parent.radius)
@@ -241,18 +261,38 @@ class Point:
         self.is_waterable = (ascii_char == ".")
         self.is_wall = (ascii_char == "#")
 
-def mutationNew(individual_parent, history, m, c1, c2, sigma, nSigma, iterationIndex, actualMap, a):     
-    sigma, nSigma = updateSigma(history, c1,c2, sigma, nSigma, iterationIndex, m)
+def mutationNew(individual_parent, history, m, c1, c2, sigma,nNegativeSigma,nPositiveSigma, iterationIndex, actualMap, a, noChangeCounter):     
+    sigma = updateSigma(history, c1,c2, sigma, iterationIndex, m)
               
-    individualChild = makeChild(individual_parent, sigma, nSigma, actualMap)
-        
-    individual, history = chooseBetterIndividual(individual_parent, individualChild, history, actualMap, a) 
+    individualChildA = makeChild(individual_parent, sigma, nNegativeSigma, actualMap)
+    individualChildB = makeChild(individual_parent, sigma, nPositiveSigma, actualMap) 
+    individualChildC = makeChild(individual_parent, sigma, 0, actualMap) 
+      
+    individual, history, winnerIdx = chooseBetterIndividual(individual_parent, individualChildA,individualChildB,individualChildC, history, actualMap, a) 
+
+    if(winnerIdx == 1):
+        nNegativeSigma -= 1 #augmentation
+        nPositiveSigma = 1  #reset
+        noChangeCounter = 0
+    if(winnerIdx == 2):
+        nPositiveSigma += 1 #augmentation
+        nNegativeSigma = -1 #reset
+        noChangeCounter = 0
+    if(winnerIdx == 3):
+        nNegativeSigma = -1 #reset
+        nPositiveSigma = 1  #reset
+        noChangeCounter = 0  
+    if(winnerIdx == 4):
+        nNegativeSigma = -1 #reset
+        nPositiveSigma = 1  #reset
+        noChangeCounter +=1
+
     
     fi = sum(history)/ len(history)
     f = rateIndividual(individual, actualMap, a)
     print("Iter ", iterationIndex," rate:   ",f,"sigma: ",sigma, "nSigma:   ",nSigma, "successRate:     ", fi, "spri._count:", len(individual.sprinklers))
     
-    return individual, sigma, nSigma, history
+    return individual, sigma, nNegativeSigma, nPositiveSigma, history, noChangeCounter
 
 def display_map(map):
     """
@@ -301,43 +341,48 @@ def plotAllMaps(maps, title):
     plt.show() 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Calculate evolution algorithm")
-    parser.add_argument('map', type=str, help="Source path with map of ascii chars")
-    parser.add_argument('radius', type=int, help="radius of single sprinkler field")
-    parser.add_argument('iterations', type=int, help="Number of iterations in trening")
-    parser.add_argument('initSprinklersNr', type=int, help="Number of sprinklers in first population")    
-    parser.add_argument('a', type=float ,help="Parameter of fitness funcion in range <0,1>")    
-    parser.add_argument('--sigma', type=int, default=2, help="Defines random disturbance from normal distribution of the child's position. As default 2")
-    parser.add_argument('--nSigma', type=int, default=2, help="Defines random disturbance from normal distribution of child's ammount of sprinklers. As default 2")
-    parser.add_argument('--c1', type=float, default=1.2, help="Parameter of (1+1) function. As default 1.2")
-    parser.add_argument('--c2', type=float, default=0.82, help="Parameter of (1+1) function. As default 1.2")    
-    parser.add_argument('--historyMax', type=int, choices=range(0, 20), default=10, help="Length of list history, which keeps history of changing and not changing parent to child ")
+    # parser = argparse.ArgumentParser(description="Calculate evolution algorithm")
+    # parser.add_argument('map', type=str, help="Source path with map of ascii chars")
+    # parser.add_argument('radius', type=int, help="radius of single sprinkler field")
+    # parser.add_argument('iterations', type=int, help="Number of iterations in trening")
+    # parser.add_argument('initSprinklersNr', type=int, help="Number of sprinklers in first population")    
+    # parser.add_argument('a', type=float ,help="Parameter of fitness funcion in range <0,1>")    
+    # parser.add_argument('--sigma', type=int, default=2, help="Defines random disturbance from normal distribution of the child's position. As default 2")
+    # parser.add_argument('--nSigma', type=int, default=2, help="Defines random disturbance from normal distribution of child's ammount of sprinklers. As default 2")
+    # parser.add_argument('--c1', type=float, default=1.2, help="Parameter of (1+1) function. As default 1.2")
+    # parser.add_argument('--c2', type=float, default=0.82, help="Parameter of (1+1) function. As default 1.2")    
+    # parser.add_argument('--historyMax', type=int, choices=range(0, 20), default=10, help="Length of list history, which keeps history of changing and not changing parent to child ")
 
     
-    args = parser.parse_args()
-    map_path = args.map
-    radius = args.radius
-    iterations = args.iterations
-    init_sprinklers_nr = args.initSprinklersNr
-    sigma = args.sigma
-    nSigma = args.nSigma
-    a = args.a #wieksze faworyzuje mniej sprinklerow
-    historyMaxLength = args.historyMax
-    c1 = 0.82
-    c2 = 1.2
-    """
+    # args = parser.parse_args()
     # map_path = args.map
-    map_path = "./maps/map5.json"
+    # radius = args.radius
+    # iterations = args.iterations
+    # init_sprinklers_nr = args.initSprinklersNr
+    # sigma = args.sigma
+    # nSigma = args.nSigma
+    # a = args.a #wieksze faworyzuje mniej sprinklerow
+    # historyMaxLength = args.historyMax
+    # c1 = 0.82
+    # c2 = 1.2
+    
+
+   
+    map_path = "./maps/map6.json"
     radius = 4
-    iterations = 150
-    init_sprinklers_nr = 10
-    sigma = 2
+    iterations = 400
+    init_sprinklers_nr = 3
+    sigma = 4
+    nPositiveSigma = 1
+    nNegativeSigma = -1
     nSigma = 2
-    a = 0.8 #wieksze faworyzuje mniej sprinklerow
+    a = 0.3 #wieksze faworyzuje mniej sprinklerow
     historyMaxLength = 10
     c1 = 0.82
     c2 = 1.2
-    """
+    maxInterNoChange = iterations #int(iterations * 0.25)
+    noChangeCounter = 0
+
     maps = []
     history = deque(maxlen=historyMaxLength)
     history.append(1)
@@ -356,12 +401,14 @@ if __name__ == "__main__":
     # actualMap.drawIndividual(parent)
     # plt.matshow(actualMap.mapDrawable, vmax=3)
     # plt.show()
-    i = 0
-    while (sigma > 0.01):
-        parent, sigma, nSigma, history = mutationNew(parent, history, historyMaxLength, c1, c2, sigma, nSigma, i+1, actualMap, a)
+
+    for i in range (iterations):
+        parent, sigma, nNegativeSigma, nPositiveSigma, history, noChangeCounter = mutationNew(parent, history, historyMaxLength, c1, c2, sigma, nNegativeSigma, nPositiveSigma, i+1, actualMap, a, noChangeCounter)
         actualMap.drawIndividual(parent)
         maps.append(deepcopy(actualMap))
         actualMap.resetActualMap()
+        if(noChangeCounter > maxInterNoChange):
+            break
     plotAllMaps(maps[:100], "first 100" )    
     plotAllMaps(maps[-100:], "last 100" )
     plotAllMaps(maps[-10:], "last 10" )
