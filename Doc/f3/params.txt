@@ -1,0 +1,13 @@
+   map_path = "./maps/map6.json"
+    radius = 3
+    iterations = 500
+    init_sprinklers_nr = 10
+    sigma = 3
+    nPositiveSigma = 1
+    nNegativeSigma = -1
+    a = 0.15
+    historyMaxLength = 10
+    c1 = 0.82
+    c2 = 1.2
+    maxInterNoChange = int(iterations * 0.3)
+    noChangeCounter = 0
