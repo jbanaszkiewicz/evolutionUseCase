@@ -10,7 +10,10 @@ from collections import deque
 from math import pi
 FITNESS_VALUES = []
 SIGMA_ITERS = []
-NSIGMA_ITERS = []
+NPOS_SIGMA_ITERS = []
+NNEG_SIGMA_ITERS = []
+COVERAGE_VALUES = []
+SPRINKLERS_COUNT = []
 class Sprinkler:
     """
     Definition of the prinkler
@@ -294,8 +297,10 @@ def mutationNew(individual_parent, history, m, c1, c2, sigma,nNegativeSigma,nPos
     f = rateIndividual(individual, actualMap, a)
     FITNESS_VALUES.append(f)
     SIGMA_ITERS.append(sigma)
-    NSIGMA_ITERS.append(nSigma)
-    print("Iter ", iterationIndex," rate:   ",f,"sigma: ",sigma, "nSigma:   ",nSigma, "successRate:     ", fi, "spri._count:", len(individual.sprinklers))
+    NPOS_SIGMA_ITERS.append(nPositiveSigma)
+    NNEG_SIGMA_ITERS.append(nNegativeSigma)
+    SPRINKLERS_COUNT.append(len(individual.sprinklers))
+    print("Iter ", iterationIndex," rate:   ",f,"sigma: ",sigma, "nPosSigma:   ",nPositiveSigma, "successRate:     ", fi, "spri._count:", len(individual.sprinklers))
     
     return individual, sigma, nNegativeSigma, nPositiveSigma, history, noChangeCounter
 
@@ -386,19 +391,18 @@ if __name__ == "__main__":
     
 
    
-    map_path = "./maps/map6.json"
-    radius = 4
-    iterations = 5
+    map_path = "./maps/map7.json"
+    radius = 2
+    iterations = 500
     init_sprinklers_nr = 3
-    sigma = 4
-    nPositiveSigma = 1
-    nNegativeSigma = -1
-    nSigma = 2
-    a = 0.3 #wieksze faworyzuje mniej sprinklerow
+    sigma = 5
+    nPositiveSigma = 2
+    nNegativeSigma = -2
+    a = 0.05
     historyMaxLength = 10
     c1 = 0.82
     c2 = 1.2
-    maxInterNoChange = iterations #int(iterations * 0.25)
+    maxInterNoChange = 100
     noChangeCounter = 0
 
     maps = []
@@ -423,11 +427,16 @@ if __name__ == "__main__":
     for i in range (iterations):
         parent, sigma, nNegativeSigma, nPositiveSigma, history, noChangeCounter = mutationNew(parent, history, historyMaxLength, c1, c2, sigma, nNegativeSigma, nPositiveSigma, i+1, actualMap, a, noChangeCounter)
         actualMap.drawIndividual(parent)
+        coverage = actualMap.getMapCoverage()
+        COVERAGE_VALUES.append(coverage)
         maps.append(deepcopy(actualMap))
         actualMap.resetActualMap()
         if(noChangeCounter > maxInterNoChange):
             break
-    plotAllMaps(maps[:100], "first 100" )    
-    plotAllMaps(maps[-100:], "last 100" )
-    plotAllMaps(maps[-10:], "last 10" )
-    plotFigures({"fitness": FITNESS_VALUES,"sigma": SIGMA_ITERS,"nSigma": NSIGMA_ITERS}, "Progres treningowy")
+    plotAllMaps(maps[:10], "first 10" )  
+    plotAllMaps(maps[-10:], "last 10" )  
+    #plotAllMaps(maps[:100], "first 100" )    
+    #plotAllMaps(maps[-100:], "last 100" )
+
+    plotFigures({"fitness": FITNESS_VALUES,"sigma": SIGMA_ITERS,"nPositiveSigma": NPOS_SIGMA_ITERS, "nNegativeSigma": NNEG_SIGMA_ITERS}, "Progres treningowy")
+    plotFigures({"coverage": COVERAGE_VALUES,"sprinklers_count": SPRINKLERS_COUNT,"fitness": FITNESS_VALUES, "sigma": SIGMA_ITERS}, "Progres treningowy")
