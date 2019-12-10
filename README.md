@@ -40,7 +40,7 @@ class Point
 Definiuje pojedyńczy punkt ma mapie. Ma 4 kluczowe atrybuty:
 is_sprinkler - w punkcie znajduje się tryskacz
 self.is_wet -  punkt jest w zasięgu tryskacza
-self.is_waterable - pole moze zostac polane
+self.is_waterable - w punkcie może się znajdować tryskacz
 self.is_wall - w punkcie jest ściana (obszar niedostępny)
 ```
 ```python 
@@ -95,17 +95,46 @@ Funckcja przystosowania została zdefiniowana jako:
 ```python
 def getFitness(individual, currentMap, a)
 ```
-Jest ona zdefiniowana równaniem: <br/>
-![](equations/fitnessFunction.png)  <br/>
-gdzie:<br/>
-![](equations/sprinklersMap.png)<br/>
-![](equations/coverageMap.png)<br/>
+Jest ona zdefiniowana równaniem: 
 
-## Przykładowa prezentacja wyników
-Wyniki działania są prezentowane na dwa sposoby:
-1. Wykres kolejnych wartości funkcji przystosowania dla kolejnych osobników, zmiana sigma & nSigma <br/>
-![](results/r4_progress.png)<br/>
-2. Wizualizacja osobnika na mapie w kolejnych iteracjach.
-![](results/r4_10.png)<br/>
-![](results/r4_-10.png)<br/>
-![](results/r4_last.png)<br/>
+![](equations/fitnessFunction.png)  
+
+gdzie:
+
+![](equations/sprinklersMap.png)
+
+![](equations/coverageMap.png)
+
+## Wyniki
+Prezprowadzono szereg symulacji, w celu znalezienia optymalnej wartości parametrów i prezentacji działania algorytmu.
+
+| Sim nr| Map  | Radius | Iters | InitSprinklers | Sigma | nPSigma | nNSigma | a   | histMax | c1   |c2   | maxInterNoChange   | FFitness| FSigma | Coverage | FSprinklers|
+| ----- |:----:| ------:| -----:| --------------:| -----:| -------:| -------:| ---:| -------:| ----:| ---:| -----------------: |--------:| ------:| --------:| ----------:|
+| f1    | map6 |    4   |  100  |      3         |   4   | 1       | -1      | 0.1 | 10      | 0.82 | 1.2 | (iterations * 0.3) |0.65     | 3.9    |          |            |
+| f2    | map6 |    2   |  300  |      5         |   4   | 1       | -1      | 0.2 | 10      | 0.82 | 1.2 | (iterations * 0.3) |0.6      | 0.5    |          |            |
+| f3    | map6 |    3   |  500  |      10        |   3   | 1       | -1      | 0.15| 10      | 0.82 | 1.2 | (iterations * 0.3) |0.72     | 0.2    |          |            |
+| f4    | map6 |    3   |  1000 |      10        |   5   | 1       | -1      | 0.18| 10      | 0.82 | 1.2 | (iterations * 0.3) |0.68     | 0.5    |          |            |
+| f5    | map6 |    3   |  1000 |      4         |   2   | 2       | -2      | 0.15| 10      | 0.82 | 1.5 | 50                 |0.73     | 0.3    |          |            |
+| f7    
+| f8    | map6 |    3   |  300  |      8         |   4   | 1       | -1      | 0.05| 10      | 0.82 | 1.5 | 100                |0.9      | 0.1    |  1       |     41     |
+| f9    | map7 |    2   |  150  |      3         |   4   | 1       | -1      | 0.1 | 10      | 0.82 | 1.2 | 100                |0.48     | 0.1    |  0.51    |     32     |
+
+Najlepsze wyniki osiągnięte na mapie 6 (symulacja 8) zaprezentowano poniżej:
+
+
+![](Doc/f8/first_10.png)
+
+
+![](Doc/f8/last_10.png)
+
+![](Doc/f8/plot1.png)
+
+![](Doc/f8/plot2.png)
+
+Wyniki osągnięte na mapie 6 (symulacja 5) zostały zaprezentowane poniżej: 
+
+![](Doc/f5/first_10.png)
+
+![](Doc/f5/last_10.png)
+
+![](Doc/f5/plot.png)
