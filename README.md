@@ -117,7 +117,7 @@ Prezprowadzono szereg symulacji, w celu znalezienia optymalnej wartości paramet
 | f5    | map6 |    3   |  1000 |      4         |   2   | 2       | -2      | 0.15| 10      | 0.82 | 1.5 | 50                 |0.73     | 0.3    |          |            |
 | f7    
 | f8    | map6 |    3   |  300  |      8         |   4   | 1       | -1      | 0.05| 10      | 0.82 | 1.5 | 100                |0.9      | 0.1    |  1       |     41     |
-| f9    | map7 |    2   |  150  |      3         |   4   | 1       | -1      | 0.1 | 10      | 0.82 | 1.2 | 100                |0.48     | 0.1    |  1       |     41     |
+| f9    | map7 |    2   |  150  |      3         |   4   | 1       | -1      | 0.1 | 10      | 0.82 | 1.2 | 100                |0.48     | 0.1    |  0.51    |     32     |
 
 Najlepsze wyniki osiągnięte na mapie 6 (symulacja 8) zaprezentowano poniżej:
 
