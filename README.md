@@ -138,3 +138,14 @@ Wyniki osągnięte na mapie 6 (symulacja 5) zostały zaprezentowane poniżej:
 ![](Doc/f5/last_10.png)
 
 ![](Doc/f5/plot.png)
+
+Przykładowe rezultaty na mapie 7 (symulacja 9) przedstawiono poniżej:
+
+![](Doc/f9/first_10.png)
+
+
+![](Doc/f9/last_10.png)
+
+![](Doc/f9/plot1.png)
+
+![](Doc/f9/plot2.png)
